@@ -1,4 +1,4 @@
-# Arduino control for Markisol iFit Spring Pro 433.92MHz window shades
+# Control Markisol iFit Spring Pro 433.92MHz window shades from Arduino Uno Rev3
 I've automated a lot in my home, but there was still one thing that kept bothering me: the window shades. I've had motorized shades for a long time, but they would only work with their own remotes. I have 3 remote controls: one can control all 5 separately. Two of the remotes would normally control a single shade, but they're easy to pair with more shades (so 2-3 shades roll down at the same time).
 
 There are many reasons to control window shades from a program. For starters, automating them from Arduino/Raspberry Pi (scheduling, based on outside temperature and/or sunlight, based on home alarm Home/Away mode etc.) and voice commands from Alexa via TRIGGERcmd. I also control them remotely via SSH & HTTPS and wrote a PHP script for Raspberry Pi.
