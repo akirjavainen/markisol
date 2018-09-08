@@ -210,7 +210,7 @@ void doSend(int *command_array) {
   transmitWaveformHigh(40); // 2 samples
 
   // Radio silence. Length is 209 samples.
-  // It's better rather go a bit over than under that.
+  // It's better to rather go a bit over than under that.
   transmitWaveformLow(4780);
   
   if (DEBUG) {
