@@ -68,8 +68,7 @@
 * 10010110010110010110110010010110110010110010110110 -- 110010110110 -- 0101100101 -- 10110110110110110110010010 -- 010110110110 -- 0100 -- 101101100   = Shades STOP
 *
 *
-* Closing bit HIGH of 2 samples / sample rate = 45 microseconds - lag compensation
-* Finally LOW radio silence of 209 samples / sample rate = 4739 microseconds
+* End with LOW radio silence of 209 samples / sample rate = 4739 microseconds
 * 
 ******************************************************************************************************************************************************************
 */
@@ -110,7 +109,7 @@
 
 
 #define TRANSMIT_PIN 13 // We'll use digital 13 for transmitting
-#define REPEAT_COMMAND 5 // How many times to repeat the same command
+#define REPEAT_COMMAND 8 // How many times to repeat the same command: original remotes repeat 8 (multi) or 10 (single) times by default
 #define DEBUG false // Disable serial output in actual use, as it WILL delay transmitting (thus causing commands to fail)
 
 // We'll use digital 13 for transmitting.
@@ -142,7 +141,7 @@ void loop() {
   // put your main code here, to run repeatedly:
 
   // Send the command:
-  sendMarkisolCommand(SHADE_DOWN_3);
+  sendMarkisolCommand(SHADE_DOWN_1);
   delay(3000);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -210,9 +209,6 @@ void doSend(int *command_array) {
 
     previous = command_array[i];
    }
-
-  // Closing bit:
-  transmitWaveformHigh(40); // 2 samples
 
   // Radio silence. Length is 209 samples.
   // It's better to rather go a bit over than under that.
