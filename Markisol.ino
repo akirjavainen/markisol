@@ -16,8 +16,7 @@
 * My translation of the waveform is simple: high = 1, low = 0. Two consecutive highs are 11 and two consecutive lows 00.
 * 
 * To view the waveform Arduino is transmitting (and debugging timings etc.), I found it easiest to connect the digital pin
-* (I use digital 13) from Arduino -> 10K Ohm resistor -> USB sound card line-in. This way the waveform was as clear as the
-* original and following the pattern trivial.
+* (13) from Arduino -> 10K Ohm resistor -> USB sound card line-in. This way the waveform was as clear as the original.
 * 
 * 
 * On-Off Keying (OOK) is used.
@@ -53,6 +52,9 @@
 * 10110010010110110010010110010010010110010110010110 -- 010010010010 -- 0101101101 -- 10010110110110110010010110 -- 110110010110 -- 1101 -- 100100100   = All shades DOWN
 * 10110010010110110010010110010010010110010110010110 -- 010010010010 -- 1101100100 -- 10010110110110110010010110 -- 110110010110 -- 0101 -- 101101100   = All shades UP
 * 10110010010110110010010110010010010110010110010110 -- 010010010010 -- 0101100101 -- 10010110110110110010010110 -- 110110010110 -- 1101 -- 101100100   = All shades STOP
+* 
+* 10110010010110110010010110010010010110010110010110 -- 010110110110 -- 1100101101 -- 10010110110110110010010110 -- 110010110110 -- 1101 -- 100100100  = Set limits (L button)
+* 10110010010110110010010110010010010110010110010110 -- 010110110110 -- 1101100101 -- 10010110110110110010010110 -- 110010110110 -- 1100 -- 101100100  = Pair channel 1 (C button)
 * 
 * 
 * Remote 2, single UP/STOP/DOWN, programmed for shades 1, 2 and 3 downstairs:
@@ -103,6 +105,9 @@
 #define SHADE_STOP_UPSTAIRS       "100101100101100101101100100101101100101100101101101100101101100101100101101101101101101101100100100101101101100100101101100"
 #define SHADE_STOP_ALL            "101100100101101100100101100100100101100101100101100100100100100101100101100101101101101100100101101101100101101101101100100"
 
+#define SHADE_PAIR_1              "101100100101101100100101100100100101100101100101100101101101101101100101100101101101101100100101101100101101101100101100100"
+#define SHADE_SET_LIMIT           "101100100101101100100101100100100101100101100101100101101101101100101101100101101101101100100101101100101101101101100100100"
+
 
 #define TRANSMIT_PIN 13 // We'll use digital 13 for transmitting
 #define REPEAT_COMMAND 15 // How many times to repeat the same command
@@ -137,7 +142,7 @@ void loop() {
   // put your main code here, to run repeatedly:
 
   // Send the command:
-  sendMarkisolCommand(SHADE_DOWN_1);
+  sendMarkisolCommand(SHADE_DOWN_3);
   delay(3000);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
