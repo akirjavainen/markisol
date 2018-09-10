@@ -110,7 +110,7 @@
 
 
 #define TRANSMIT_PIN 13 // We'll use digital 13 for transmitting
-#define REPEAT_COMMAND 15 // How many times to repeat the same command
+#define REPEAT_COMMAND 5 // How many times to repeat the same command
 #define DEBUG false // Disable serial output in actual use, as it WILL delay transmitting (thus causing commands to fail)
 
 // We'll use digital 13 for transmitting.
