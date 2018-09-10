@@ -16,6 +16,3 @@ To view the waveform Arduino is transmitting, I found it easiest to connect the 
 
 # More work needed
 How are device ID's generated for remote controls and shades? More work, remotes and shades are needed. So if you own any of these shades, it would be great if you could send me either the WAV files or deciphers (as 1's and 0's) of the codes your remotes send. You could even snail mail me the remotes themselves, but that would be at your own expense, as well as returning them. :)
-
-
-(c) Antti Kirjavainen 2018
