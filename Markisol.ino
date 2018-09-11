@@ -1,26 +1,35 @@
 /*
 ******************************************************************************************************************************************************************
 *
-* Markisol iFit Spring Pro 433.92MHz window shades
+* Markisol iFit Spring Pro 433.92MHz window shades (also sold under the name Feelstyle)
 * Control code by Antti Kirjavainen (antti.kirjavainen [_at_] gmail.com)
 * 
 * http://www.markisolgroup.com/en/products/ifit.html
 * 
-* Since I didn't want to mess up my shades, I haven't tested how pairing process (linking a remote with a shade) changes
-* commands. I didn't have extra shades to mess around with, either. This means the commands haven't been properly reverse
-* engineered and that these codes may or may not work directly with other shades of the same brand. Try them first and
-* if none happen to be working for you, simply use an oscillator to copy the code your particular remote is transmitting.
+* Unless I'm completely mistaken, each remote has its unique ID. However, I've included the pairing commands from my remotes
+* here, so you can pair them to your shades and use these commands directly:
 * 
-* I built a "poor man's oscillator" by plugging a 433.92MHz receiver unit data pin -> 10K Ohm resistor -> USB sound card line-in.
+* 1. Set the shade into pairing mode by holding down its red P button until it shakes twice (TA-TA).
+* 2. Send the pairing command from this code, eg. "sendMarkisolCommand(SHADE_PAIR_1);", which will shake the shade twice (TA-TA).
+* 3. Control the shade with that channel's codes, eg. sendMarkisolCommand(SHADE_DOWN_1); (or SHADE_UP_1, SHADE_STOP_1 etc.).
+* 
+* Settings limits is quicker and easier with the original remotes. Typically, limits are not lost even if you reset the shade
+* by holding down its red P button for 8-10 seconds. The purpose of this project was to get my own window shades automated, so
+* there's a lot more work to be done should you wish to fully reverse engineer the codes and generate + add new "virtual remotes".
+* 
+* Commands were captured by a "poor man's oscillator": 433.92MHz receiver unit (data pin) -> 10K Ohm resistor -> USB sound card line-in.
 * Try that at your own risk. Power to the 433.92MHz receiver unit was provided by Arduino (connected to 5V and GND).
 * My translation of the waveform is simple: high = 1, low = 0. Two consecutive highs are 11 and two consecutive lows 00.
 * 
-* To view the waveform Arduino is transmitting (and debugging timings etc.), I found it easiest to connect the digital pin
-* (13) from Arduino -> 10K Ohm resistor -> USB sound card line-in. This way the waveform was as clear as the original.
+* To view the waveform Arduino is transmitting (and debugging timings etc.), I found it easiest to connect the digital pin (13)
+* from Arduino -> 10K Ohm resistor -> USB sound card line-in. This way the waveform was as clear as the original.
+* 
+* BF-305 and BF-101 seem like some kind of generic remotes, used by many different vendors and shades. Are they all based on
+* this format? No idea. It's possible each vendor reprograms them for their products.
 * 
 * 
 * On-Off Keying (OOK) is used.
-* A single command is: 2 AGC bits + 123 command bits + 1 ending bit + radio silence
+* A single command is: 2 AGC bits + 123 command bits + radio silence
 * Swapping HIGH and LOW does not work with these shades.
 *
 * Starting (AGC) bits:
@@ -28,7 +37,7 @@
 * LOW of 73 samples / 44100 = 1655 microseconds - lag compensation
 *
 *
-* Remote 1 (multi), controlling 5 different shades:
+* Remote 1 multi (model BF-305), controlling 5 different shades:
 *
 *                  REMOTE CONTROL ID                     SHADE ID?       COMMAND           REMOTE CONTROL ID         SHADE ID?       ?      COMMAND?
 * 10110010010110110010010110010010010110010110010110 -- 010110110110 -- 0101101101 -- 10010110110110110010010110 -- 110010110110 -- 0101 -- 100100100   = Shade 1 DOWN
@@ -53,19 +62,33 @@
 * 10110010010110110010010110010010010110010110010110 -- 010010010010 -- 1101100100 -- 10010110110110110010010110 -- 110110010110 -- 0101 -- 101101100   = All shades UP
 * 10110010010110110010010110010010010110010110010110 -- 010010010010 -- 0101100101 -- 10010110110110110010010110 -- 110110010110 -- 1101 -- 101100100   = All shades STOP
 * 
-* 10110010010110110010010110010010010110010110010110 -- 010110110110 -- 1100101101 -- 10010110110110110010010110 -- 110010110110 -- 1101 -- 100100100  = Set limits (L button)
-* 10110010010110110010010110010010010110010110010110 -- 010110110110 -- 1101100101 -- 10010110110110110010010110 -- 110010110110 -- 1100 -- 101100100  = Pair channel 1 (C button)
+* 10110010010110110010010110010010010110010110010110 -- 010110110110 -- 1101100101 -- 10010110110110110010010110 -- 110010110110 -- 1100 -- 101100100   = Pair channel 1
+* 10110010010110110010010110010010010110010110010110 -- 110010110110 -- 1101100101 -- 10010110110110110010010110 -- 010110110110 -- 1100 -- 101100100   = Pair channel 2
+* 10110010010110110010010110010010010110010110010110 -- 010010110110 -- 1101100101 -- 10010110110110110010010110 -- 110110110110 -- 1100 -- 101100100   = Pair channel 3
+* 10110010010110110010010110010010010110010110010110 -- 110110010110 -- 1101100101 -- 10010110110110110010010110 -- 010010010010 -- 0101 -- 101100100   = Pair channel 4
+* 10110010010110110010010110010010010110010110010110 -- 010110010110 -- 1101100101 -- 10010110110110110010010110 -- 110010010010 -- 0101 -- 101100100   = Pair channel 5
+* 
+* 10110010010110110010010110010010010110010110010110 -- 010110110110 -- 1100101101 -- 10010110110110110010010110 -- 110010110110 -- 1101 -- 100100100   = Set limits channel 1 
+* 10110010010110110010010110010010010110010110010110 -- 110010110110 -- 1100101101 -- 10010110110110110010010110 -- 010110110110 -- 1101 -- 100100100   = Set limits channel 2
+* 10110010010110110010010110010010010110010110010110 -- 010010110110 -- 1100101101 -- 10010110110110110010010110 -- 110110110110 -- 1101 -- 100100100   = Set limits channel 3
+* 10110010010110110010010110010010010110010110010110 -- 110110010110 -- 1100101101 -- 10010110110110110010010110 -- 010010010010 -- 0100 -- 101100100   = Set limits channel 4
+* 10110010010110110010010110010010010110010110010110 -- 010110010110 -- 1100101101 -- 10010110110110110010010110 -- 110010010010 -- 0100 -- 101100100   = Set limits channel 5
 * 
 * 
-* Remote 2, single UP/STOP/DOWN, programmed for shades 1, 2 and 3 downstairs:
+* Remote 2 (model BF-101), single UP/STOP/DOWN, programmed for shades 1, 2 and 3 downstairs:
 * 10010110010010010010010010010010110110110010110110 -- 110010110110 -- 0101101101 -- 10110110110110110110010010 -- 010010010010 -- 1101 -- 101101100   = Shades DOWN
 * 10010110010010010010010010010010110110110010110110 -- 110010110110 -- 1101100100 -- 10110110110110110110010010 -- 010010010010 -- 0101 -- 100101100   = Shades UP
 * 10010110010010010010010010010010110110110010110110 -- 110010110110 -- 0101100101 -- 10110110110110110110010010 -- 010010010010 -- 1101 -- 100100100   = Shades STOP
+* 10010110010010010010010010010010110110110010110110 -- 110010110110 -- 1101100101 -- 10110110110110110110010010 -- 010010010010 -- 0101 -- 100100100   = Pair
+* 10010110010010010010010010010010110110110010110110 -- 110010110110 -- 1100101101 -- 10110110110110110110010010 -- 010010010010 -- 0100 -- 100100100   = Set limits
+* 
 *
-* Remote 3, single UP/STOP/DOWN, programmed for shades 4 and 5 upstairs:
+* Remote 3 (model BF-101), single UP/STOP/DOWN, programmed for shades 4 and 5 upstairs:
 * 10010110010110010110110010010110110010110010110110 -- 110010110110 -- 0101101101 -- 10110110110110110110010010 -- 010110110110 -- 0100 -- 100101100   = Shades DOWN
 * 10010110010110010110110010010110110010110010110110 -- 110010110110 -- 1101100100 -- 10110110110110110110010010 -- 010110110110 -- 1101 -- 100100100   = Shades UP
 * 10010110010110010110110010010110110010110010110110 -- 110010110110 -- 0101100101 -- 10110110110110110110010010 -- 010110110110 -- 0100 -- 101101100   = Shades STOP
+* 10010110010110010110110010010110110010110010110110 -- 110010110110 -- 1101100101 -- 10110110110110110110010010 -- 010110110110 -- 1101 -- 100101100   = Pair
+* 10010110010110010110110010010110110010110010110110 -- 110010110110 -- 1100101101 -- 10110110110110110110010010 -- 010110110110 -- 1100 -- 100101100   = Set limits
 *
 *
 * End with LOW radio silence of 209 samples / sample rate = 4739 microseconds
@@ -105,7 +128,22 @@
 #define SHADE_STOP_ALL            "101100100101101100100101100100100101100101100101100100100100100101100101100101101101101100100101101101100101101101101100100"
 
 #define SHADE_PAIR_1              "101100100101101100100101100100100101100101100101100101101101101101100101100101101101101100100101101100101101101100101100100"
-#define SHADE_SET_LIMIT           "101100100101101100100101100100100101100101100101100101101101101100101101100101101101101100100101101100101101101101100100100"
+#define SHADE_PAIR_2              "101100100101101100100101100100100101100101100101101100101101101101100101100101101101101100100101100101101101101100101100100"
+#define SHADE_PAIR_3              "101100100101101100100101100100100101100101100101100100101101101101100101100101101101101100100101101101101101101100101100100"
+#define SHADE_PAIR_4              "101100100101101100100101100100100101100101100101101101100101101101100101100101101101101100100101100100100100100101101100100"
+#define SHADE_PAIR_5              "101100100101101100100101100100100101100101100101100101100101101101100101100101101101101100100101101100100100100101101100100"
+
+#define SHADE_PAIR_DOWNSTAIRS     "100101100100100100100100100100101101101100101101101100101101101101100101101101101101101101100100100100100100100101100100100"
+#define SHADE_PAIR_UPSTAIRS       "100101100101100101101100100101101100101100101101101100101101101101100101101101101101101101100100100101101101101101100101100"
+
+#define SHADE_LIMIT_1             "101100100101101100100101100100100101100101100101100101101101101100101101100101101101101100100101101100101101101101100100100"
+#define SHADE_LIMIT_2             "101100100101101100100101100100100101100101100101101100101101101100101101100101101101101100100101100101101101101101100100100"
+#define SHADE_LIMIT 3             "101100100101101100100101100100100101100101100101100100101101101100101101100101101101101100100101101101101101101101100100100"
+#define SHADE_LIMIT_4             "101100100101101100100101100100100101100101100101101101100101101100101101100101101101101100100101100100100100100100101100100"
+#define SHADE_LIMIT_5             "101100100101101100100101100100100101100101100101100101100101101100101101100101101101101100100101101100100100100100101100100"
+
+#define SHADE_LIMIT_DOWNSTAIRS    "100101100100100100100100100100101101101100101101101100101101101100101101101101101101101101100100100100100100100100100100100"
+#define SHADE_LIMIT_UPSTAIRS      "100101100101100101101100100101101100101100101101101100101101101100101101101101101101101101100100100101101101101100100101100"
 
 
 #define TRANSMIT_PIN 13 // We'll use digital 13 for transmitting
@@ -141,7 +179,16 @@ void loop() {
   // put your main code here, to run repeatedly:
 
   // Send the command:
-  sendMarkisolCommand(SHADE_DOWN_1);
+  //sendMarkisolCommand(SHADE_DOWN_1);
+  //sendMarkisolCommand(SHADE_DOWN_2);
+  //sendMarkisolCommand(SHADE_DOWN_3);
+
+  //sendMarkisolCommand(SHADE_STOP_1);
+  //sendMarkisolCommand(SHADE_STOP_2);
+  //sendMarkisolCommand(SHADE_STOP_3);
+
+  //sendMarkisolCommand(SHADE_UP_1);
+  //sendMarkisolCommand(SHADE_UP_3);
   delay(3000);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
