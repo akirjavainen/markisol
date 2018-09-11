@@ -180,15 +180,10 @@ void loop() {
 
   // Send the command:
   //sendMarkisolCommand(SHADE_DOWN_1);
-  //sendMarkisolCommand(SHADE_DOWN_2);
-  //sendMarkisolCommand(SHADE_DOWN_3);
 
   //sendMarkisolCommand(SHADE_STOP_1);
-  //sendMarkisolCommand(SHADE_STOP_2);
-  //sendMarkisolCommand(SHADE_STOP_3);
 
   //sendMarkisolCommand(SHADE_UP_1);
-  //sendMarkisolCommand(SHADE_UP_3);
   delay(3000);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
