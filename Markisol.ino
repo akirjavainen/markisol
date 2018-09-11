@@ -6,8 +6,8 @@
 * 
 * http://www.markisolgroup.com/en/products/ifit.html
 * 
-* Unless I'm completely mistaken, each remote has its unique ID. However, I've included the pairing commands from my remotes
-* here, so you can pair them to your shades and use these commands directly:
+* Unless I'm completely mistaken, each remote has its unique ID. However, I've included the pairing commands from my remotes,
+* so you can simply pair them to your shades and take advantage of them directly:
 * 
 * 1. Set the shade into pairing mode by holding down its red P button until it shakes twice (TA-TA).
 * 2. Send the pairing command from this code, eg. "sendMarkisolCommand(SHADE_PAIR_1);", which will shake the shade twice (TA-TA).
@@ -180,10 +180,18 @@ void loop() {
 
   // Send the command:
   //sendMarkisolCommand(SHADE_DOWN_1);
-
+  //sendMarkisolCommand(SHADE_DOWN_2);
+  //sendMarkisolCommand(SHADE_DOWN_3);
+  delay(3000);
+  
   //sendMarkisolCommand(SHADE_STOP_1);
-
+  //sendMarkisolCommand(SHADE_STOP_2);
+  //sendMarkisolCommand(SHADE_STOP_3);
+  delay(3000);
+  
   //sendMarkisolCommand(SHADE_UP_1);
+  //sendMarkisolCommand(SHADE_UP_2);
+  //sendMarkisolCommand(SHADE_UP_3);
   delay(3000);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
