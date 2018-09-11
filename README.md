@@ -19,7 +19,7 @@ Setting limits is quicker and easier with the original remotes. Typically, limit
 # Poor man's oscillator
 Commands were captured by a "poor man's oscillator": plugging a 433.92MHz receiver unit (data pin) -> 10K Ohm resistor -> USB sound card line-in. Try that at your own risk. Power to the 433.92MHz receiver unit was provided by Arduino (connected to 5V and GND). My translation of the waveform is simple: high = 1, low = 0. Two consecutive highs are 11 and two consecutive lows 00.
 
-To view the waveform Arduino is transmitting, I found it easiest to connect the digital pin (13) directly from Arduino -> 10K Ohm resistor -> USB sound card line-in. This way the waveform was as clear as the original and debugging became easy.
+To view the waveform Arduino is transmitting, I found it easiest to connect the digital pin (13) directly from Arduino -> 10K Ohm resistor -> USB sound card line-in. This way the waveform was as clear as the original and debugging easy.
 
 
 # More information and work required
