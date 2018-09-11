@@ -6,16 +6,18 @@
 * 
 * http://www.markisolgroup.com/en/products/ifit.html
 * 
-* Unless I'm completely mistaken, each remote has its unique ID. However, I've included the pairing commands from my remotes,
-* so you can simply pair them to your shades and take advantage of them directly:
+* Unless I'm completely mistaken, each remote has its unique (or nearly unique) ID. However, I've included the pairing commands
+* from my remotes, so you can simply pair them to your shades and take advantage of them directly. The purpose of this project was
+* to get my own window shades automated, so there's a lot more work to be done should you wish to fully reverse engineer the codes
+* and generate + add new "virtual remotes".
 * 
-* 1. Set the shade into pairing mode by holding down its red P button until it shakes twice (TA-TA).
-* 2. Send the pairing command from this code, eg. "sendMarkisolCommand(SHADE_PAIR_1);", which will shake the shade twice (TA-TA).
+* USAGE:
+* 1. Set the shade into pairing mode by holding down its red P button until it shakes twice ("TA-TA").
+* 2. Send the pairing command from this code, eg. "sendMarkisolCommand(SHADE_PAIR_1);", which will shake the shade twice ("TA-TA").
 * 3. Control the shade with that channel's codes, eg. sendMarkisolCommand(SHADE_DOWN_1); (or SHADE_UP_1, SHADE_STOP_1 etc.).
 * 
 * Setting limits is quicker and easier with the original remotes. Typically, limits are not lost even if you reset the shade
-* by holding down its red P button for 8-10 seconds. The purpose of this project was to get my own window shades automated, so
-* there's a lot more work to be done should you wish to fully reverse engineer the codes and generate + add new "virtual remotes".
+* by holding down its red P button for 8-10 seconds.
 * 
 * Commands were captured by a "poor man's oscillator": 433.92MHz receiver unit (data pin) -> 10K Ohm resistor -> USB sound card line-in.
 * Try that at your own risk. Power to the 433.92MHz receiver unit was provided by Arduino (connected to 5V and GND).
@@ -24,7 +26,7 @@
 * To view the waveform Arduino is transmitting (and debugging timings etc.), I found it easiest to connect the digital pin (13)
 * from Arduino -> 10K Ohm resistor -> USB sound card line-in. This way the waveform was as clear as the original.
 * 
-* BF-305 and BF-101 seem like some kind of generic remotes, used by many different vendors and shades. Are they all based on
+* BF-305 and BF-101 seem like some kind of generic remotes, used by many different vendors and products. Are they all based on
 * this format? No idea. It's possible each vendor reprograms them for their products.
 * 
 * 
@@ -282,6 +284,7 @@ void doSend(int *command_array) {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void transmitWaveformHigh(int delay_microseconds) {
   PORTB = PORTB D13low; // Digital pin low transmits a high waveform
+  //digitalWrite(TRANSMIT_PIN, LOW); // Try this if the PORTB command fails (a different Arduino model etc.)
   delayMicroseconds(delay_microseconds);
 
   if (DEBUG) {
@@ -295,6 +298,7 @@ void transmitWaveformHigh(int delay_microseconds) {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void transmitWaveformLow(int delay_microseconds) {
   PORTB = PORTB D13high; // Digital pin high transmits a low waveform
+  //digitalWrite(TRANSMIT_PIN, HIGH); // Try this if the PORTB command fails (a different Arduino model etc.)
   delayMicroseconds(delay_microseconds);
 
   if (DEBUG) {
