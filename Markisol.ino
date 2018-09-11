@@ -13,7 +13,7 @@
 * 2. Send the pairing command from this code, eg. "sendMarkisolCommand(SHADE_PAIR_1);", which will shake the shade twice (TA-TA).
 * 3. Control the shade with that channel's codes, eg. sendMarkisolCommand(SHADE_DOWN_1); (or SHADE_UP_1, SHADE_STOP_1 etc.).
 * 
-* Settings limits is quicker and easier with the original remotes. Typically, limits are not lost even if you reset the shade
+* Setting limits is quicker and easier with the original remotes. Typically, limits are not lost even if you reset the shade
 * by holding down its red P button for 8-10 seconds. The purpose of this project was to get my own window shades automated, so
 * there's a lot more work to be done should you wish to fully reverse engineer the codes and generate + add new "virtual remotes".
 * 
@@ -177,6 +177,11 @@ void setup() {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void loop() {
   // put your main code here, to run repeatedly:
+
+  // Pair a shade (first set the shade to pairing mode by holding
+  // down its red P button until the "TA-TA"):
+  //sendMarkisolCommand(SHADE_PAIR_1);
+  //while (true) {} // Stop after pairing, you can use UP/STOP/DOWN commands afterwards
 
   // Send the command:
   //sendMarkisolCommand(SHADE_DOWN_1);
