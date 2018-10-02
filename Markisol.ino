@@ -227,7 +227,7 @@ void sendMarkisolCommand(String command) {
     doSend(command_array);
   }
 
-  // Disable power to transmitter to prevent interference with other devices:
+  // Disable output to transmitter to prevent interference with other devices:
   pinMode(TRANSMIT_PIN, INPUT);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
