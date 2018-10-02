@@ -168,8 +168,6 @@
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void setup() {
   // put your setup code here, to run once:
-
-  pinMode(TRANSMIT_PIN, OUTPUT); // Prepare the digital pin for output
   Serial.begin(9600); // Used for error messages even with DEBUG set to false
       
   if (DEBUG) Serial.println("Starting up...");
@@ -206,6 +204,7 @@ void loop() {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void sendMarkisolCommand(String command) {
   // Prepare for transmitting and check for validity
+  pinMode(TRANSMIT_PIN, OUTPUT); // Prepare the digital pin for output
   
   if (command.length() < COMMAND_BIT_ARRAY_SIZE) {
     errorLog("sendMarkisolCommand(): Invalid command (too short), cannot continue.");
@@ -227,6 +226,9 @@ void sendMarkisolCommand(String command) {
   for (int i = 0; i < REPEAT_COMMAND; i++) {
     doSend(command_array);
   }
+
+  // Disable power to transmitter to prevent interference with other devices:
+  pinMode(TRANSMIT_PIN, INPUT);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
