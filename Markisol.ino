@@ -35,13 +35,13 @@
 * Swapping HIGH and LOW does not work with these shades.
 *
 * Starting (AGC) bits:
-* HIGH of 107 samples / 44100 = 2426 microseconds - lag compensation
-* LOW of 73 samples / 44100 = 1655 microseconds - lag compensation
+* HIGH of 107 samples / sample rate = 2426 microseconds - lag compensation
+* LOW of 73 samples / sample rate = 1655 microseconds - lag compensation
 *
 *
 * Remote 1 multi (model BF-305), controlling 5 different shades:
 *
-*                  REMOTE CONTROL ID                    CHANNEL ID?       COMMAND           REMOTE CONTROL ID       CHANNEL ID?      ?      COMMAND?
+*                  REMOTE CONTROL ID                    CHANNEL ID?      COMMAND          REMOTE CONTROL ID         CHANNEL ID?      ?      COMMAND?
 * 10110010010110110010010110010010010110010110010110 -- 010110110110 -- 0101101101 -- 10010110110110110010010110 -- 110010110110 -- 0101 -- 100100100   = Shade 1 DOWN
 * 10110010010110110010010110010010010110010110010110 -- 110010110110 -- 0101101101 -- 10010110110110110010010110 -- 010110110110 -- 0101 -- 100100100   = Shade 2 DOWN
 * 10110010010110110010010110010010010110010110010110 -- 010010110110 -- 0101101101 -- 10010110110110110010010110 -- 110110110110 -- 0101 -- 100100100   = Shade 3 DOWN
@@ -152,8 +152,7 @@
 #define REPEAT_COMMAND 8 // How many times to repeat the same command: original remotes repeat 8 (multi) or 10 (single) times by default
 #define DEBUG false // Disable serial output in actual use, as it WILL delay transmitting (thus causing commands to fail)
 
-// We'll use digital 13 for transmitting.
-// These are for Arduino Uno and may require changing for other models (or try using digitalWrite() instead):
+// If you wish to use PORTB commands instead of digitalWrite, these are for Arduino Uno digital 13:
 #define D13high | 0x20; 
 #define D13low  & 0xDF; 
 
@@ -168,6 +167,7 @@
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void setup() {
   // put your setup code here, to run once:
+
   Serial.begin(9600); // Used for error messages even with DEBUG set to false
       
   if (DEBUG) Serial.println("Starting up...");
@@ -227,7 +227,9 @@ void sendMarkisolCommand(String command) {
     doSend(command_array);
   }
 
-  // Disable output to transmitter to prevent interference with other devices:
+  // Disable output to transmitter to prevent interference with other devices.
+  // Without this line the transmitter will keep on transmitting LOW, which
+  // will disrupt most appliances operating on the 433.92MHz frequency:
   pinMode(TRANSMIT_PIN, INPUT);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -285,8 +287,8 @@ void doSend(int *command_array) {
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void transmitWaveformHigh(int delay_microseconds) {
-  PORTB = PORTB D13low; // Digital pin low transmits a high waveform
-  //digitalWrite(TRANSMIT_PIN, LOW); // Try this if the PORTB command fails (a different Arduino model etc.)
+  digitalWrite(TRANSMIT_PIN, LOW); // Digital pin low transmits a high waveform
+  //PORTB = PORTB D13low; // If you wish to use faster PORTB commands instead
   delayMicroseconds(delay_microseconds);
 
   if (DEBUG) {
@@ -299,8 +301,8 @@ void transmitWaveformHigh(int delay_microseconds) {
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void transmitWaveformLow(int delay_microseconds) {
-  PORTB = PORTB D13high; // Digital pin high transmits a low waveform
-  //digitalWrite(TRANSMIT_PIN, HIGH); // Try this if the PORTB command fails (a different Arduino model etc.)
+  digitalWrite(TRANSMIT_PIN, HIGH); // Digital pin high transmits a low waveform
+  //PORTB = PORTB D13high; // If you wish to use faster PORTB commands instead
   delayMicroseconds(delay_microseconds);
 
   if (DEBUG) {
