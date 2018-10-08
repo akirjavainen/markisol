@@ -231,7 +231,6 @@ void sendMarkisolCommand(String command) {
   // other devices. Otherwise the transmitter will keep on transmitting,
   // which will disrupt most appliances operating on the 433.92MHz band:
   digitalWrite(TRANSMIT_PIN, LOW);
-  pinMode(TRANSMIT_PIN, INPUT);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
