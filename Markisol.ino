@@ -175,9 +175,14 @@
 
 // Get sample count by zooming all the way in to the waveform with Audacity.
 // Calculate microseconds with: (samples / sample rate, usually 44100 or 48000) - ~15-20 to compensate for delayMicroseconds overhead.
-#define PULSE_SHORT_MICRO_SECONDS 300 // 13-16 samples
-#define PULSE_ADDITIONAL_LONG_MICRO_SECONDS 380 // 26-32 samples: sendMarkisolCommand() delays this + PULSE_SHORT_MICRO_SECONDS = 680 microseconds all in all
-#define COMMAND_BIT_ARRAY_SIZE 123 // Command bit count
+#define MARKISOL_AGC1_PULSE                   2410  // 107 samples
+#define MARKISOL_AGC2_PULSE                   1640  // 73 samples
+#define MARKISOL_RADIO_SILENCE                4780  // 209 samples
+
+#define MARKISOL_PULSE_SHORT                  300 // 13-16 samples
+#define MARKISOL_PULSE_LONG_ADDITIONAL        380 // 26-32 samples: doOOKSend() delays this + PULSE_SHORT_MICRO_SECONDS = 680 microseconds all in all
+
+#define MARKISOL_COMMAND_BIT_ARRAY_SIZE       123 // Command bit count
 
 
 
@@ -223,25 +228,25 @@ void sendMarkisolCommand(String command) {
   // Prepare for transmitting and check for validity
   pinMode(TRANSMIT_PIN, OUTPUT); // Prepare the digital pin for output
   
-  if (command.length() < COMMAND_BIT_ARRAY_SIZE) {
+  if (command.length() < MARKISOL_COMMAND_BIT_ARRAY_SIZE) {
     errorLog("sendMarkisolCommand(): Invalid command (too short), cannot continue.");
     return;
   }
-  if (command.length() > COMMAND_BIT_ARRAY_SIZE) {
+  if (command.length() > MARKISOL_COMMAND_BIT_ARRAY_SIZE) {
     errorLog("sendMarkisolCommand(): Invalid command (too long), cannot continue.");
     return;
   }
 
   // Declare the array (int) of command bits
-  int command_array[COMMAND_BIT_ARRAY_SIZE];
+  int command_array[MARKISOL_COMMAND_BIT_ARRAY_SIZE];
 
   // Processing a string during transmit is just too slow,
   // let's convert it to an array of int first:
-  convertStringToArrayOfInt(command, command_array);
+  convertStringToArrayOfInt(command, command_array, MARKISOL_COMMAND_BIT_ARRAY_SIZE);
   
   // Repeat the command:
   for (int i = 0; i < REPEAT_COMMAND; i++) {
-    doSend(command_array);
+    doOOKSend(command_array, MARKISOL_COMMAND_BIT_ARRAY_SIZE, MARKISOL_AGC1_PULSE, MARKISOL_AGC2_PULSE, MARKISOL_RADIO_SILENCE, MARKISOL_PULSE_SHORT, MARKISOL_PULSE_LONG_ADDITIONAL);
   }
 
   // Disable output to transmitter to prevent interference with
@@ -252,50 +257,50 @@ void sendMarkisolCommand(String command) {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void doSend(int *command_array) {
+void doOOKSend(int *command_array, int command_array_size, int pulse_agc1, int pulse_agc2, int pulse_radio_silence, int pulse_short, int pulse_long_additional) {
   int previous = 2;
 
   if (command_array == NULL) {
-    errorLog("doSend(): Array pointer was NULL, cannot continue.");
+    errorLog("doOOKSend(): Array pointer was NULL, cannot continue.");
     return;
   }
 
   // Starting (AGC) bits:
-  transmitWaveformHigh(2410); // 107 samples
-  transmitWaveformLow(1640); // 73 samples
+  transmitWaveformHigh(pulse_agc1);
+  transmitWaveformLow(pulse_agc2);
 
   // Transmit command:
-  for (int i = 0; i < COMMAND_BIT_ARRAY_SIZE; i++) {
+  for (int i = 0; i < command_array_size; i++) {
 
     // If current bit is 0:
     if (command_array[i] == 0) {
       if (previous != 0) { // If previous bit was 1, change pin state
-        transmitWaveformLow(PULSE_SHORT_MICRO_SECONDS);
+        transmitWaveformLow(pulse_short);
       } else { // If previous bit was already 0, only extend the delay
-        additionalDelay(PULSE_ADDITIONAL_LONG_MICRO_SECONDS);
+        additionalDelay(pulse_long_additional);
       }
     }
 
     // If current bit is 1:
     if (command_array[i] == 1) {
       if (previous != 1) { // If previous bit was 0, change pin state
-        transmitWaveformHigh(PULSE_SHORT_MICRO_SECONDS);
+        transmitWaveformHigh(pulse_short);
       } else { // If previous bit was already 1, only extend the delay
-        additionalDelay(PULSE_ADDITIONAL_LONG_MICRO_SECONDS);
+        additionalDelay(pulse_long_additional);
       }
     }
 
     previous = command_array[i];
    }
 
-  // Radio silence. Length is 209 samples.
-  // It's better to rather go a bit over than under that.
-  transmitWaveformLow(4780);
+  // Radio silence at the end.
+  // It's better to rather go a bit over than under required length.
+  transmitWaveformLow(pulse_radio_silence);
   
   if (DEBUG) {
     Serial.println();
     Serial.print("Transmitted ");
-    Serial.print(COMMAND_BIT_ARRAY_SIZE);
+    Serial.print(command_array_size);
     Serial.println(" bits.");
     Serial.println();
   }
@@ -307,12 +312,6 @@ void transmitWaveformHigh(int delay_microseconds) {
   digitalWrite(TRANSMIT_PIN, LOW); // Digital pin low transmits a high waveform
   //PORTB = PORTB D13low; // If you wish to use faster PORTB commands instead
   delayMicroseconds(delay_microseconds);
-
-  if (DEBUG) {
-    Serial.print("1(");
-    Serial.print(delay_microseconds);
-    Serial.print(")-");
-  }
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -321,22 +320,12 @@ void transmitWaveformLow(int delay_microseconds) {
   digitalWrite(TRANSMIT_PIN, HIGH); // Digital pin high transmits a low waveform
   //PORTB = PORTB D13high; // If you wish to use faster PORTB commands instead
   delayMicroseconds(delay_microseconds);
-
-  if (DEBUG) {
-    Serial.print("0(");
-    Serial.print(delay_microseconds);
-    Serial.print(")-");
-  }
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void additionalDelay(int delay_microseconds) {
   delayMicroseconds(delay_microseconds);
-  
-  if (DEBUG) {
-    Serial.print("(L)-");
-  }
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -353,7 +342,7 @@ int convertStringToInt(String s) {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void convertStringToArrayOfInt(String command, int *int_array) {
+void convertStringToArrayOfInt(String command, int *int_array, int command_array_size) {
   String c = "";
 
   if (int_array == NULL) {
@@ -361,13 +350,13 @@ void convertStringToArrayOfInt(String command, int *int_array) {
     return;
   }
  
-  for (int i = 0; i < COMMAND_BIT_ARRAY_SIZE; i++) {
+  for (int i = 0; i < command_array_size; i++) {
       c = command.substring(i, i + 1);
 
-      if (c == "0" || c == "1") {
+      if (c == "0" || c == "1" || c == "2" || c == "3") { // 2 and 3 are allowed for doManchesterSend() (not used by this code)
         int_array[i] = convertStringToInt(c);
       } else {
-        errorLog("convertStringToArrayOfInt(): Invalid character " + c + " in command, only 1 and 0 are accepted.");
+        errorLog("convertStringToArrayOfInt(): Invalid character " + c + " in command.");
         return;
       }
   }
