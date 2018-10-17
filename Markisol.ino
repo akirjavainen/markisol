@@ -165,15 +165,15 @@
 #define SHADE_CHANGE_DIRECTION_UPSTAIRS     "100101100101100101101100100101101100101100101101101100101101101101101100101101101101101101100100100101101101101101101101100"
 
 
-#define TRANSMIT_PIN 13 // We'll use digital 13 for transmitting
-#define REPEAT_COMMAND 8 // How many times to repeat the same command: original remotes repeat 8 (multi) or 10 (single) times by default
-#define DEBUG false // Disable serial output in actual use, as it WILL delay transmitting (thus causing commands to fail)
+#define TRANSMIT_PIN          13      // We'll use digital 13 for transmitting
+#define REPEAT_COMMAND        8       // How many times to repeat the same command: original remotes repeat 8 (multi) or 10 (single) times by default
+#define DEBUG                 false   // Do note that if you add serial output during transmit, it will cause delay and commands may fail
 
 // If you wish to use PORTB commands instead of digitalWrite, these are for Arduino Uno digital 13:
 #define D13high | 0x20; 
 #define D13low  & 0xDF; 
 
-// Get sample count by zooming all the way in to the waveform with Audacity.
+// Timings in microseconds. Get sample count by zooming all the way in to the waveform with Audacity.
 // Calculate microseconds with: (samples / sample rate, usually 44100 or 48000) - ~15-20 to compensate for delayMicroseconds overhead.
 #define MARKISOL_AGC1_PULSE                   2410  // 107 samples
 #define MARKISOL_AGC2_PULSE                   1640  // 73 samples
