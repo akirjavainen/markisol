@@ -267,7 +267,6 @@ void sendMarkisolCommand(String command) {
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void doMarkisolTribitSend(int *command_array, int command_array_size, int pulse_agc1, int pulse_agc2, int pulse_radio_silence, int pulse_short, int pulse_long) {
-  //int previous = 2;
 
   if (command_array == NULL) {
     errorLog("doMarkisolTribitSend(): Array pointer was NULL, cannot continue.");
@@ -280,27 +279,7 @@ void doMarkisolTribitSend(int *command_array, int command_array_size, int pulse_
 
   // Transmit command:
   for (int i = 0; i < command_array_size; i++) {
-/*
-    // If current bit is 0:
-    if (command_array[i] == 0) {
-      if (previous != 0) { // If previous bit was 1, change pin state
-        transmitWaveformLow(pulse_short);
-      } else { // If previous bit was already 0, only extend the delay
-        additionalDelay(pulse_long_additional);
-      }
-    }
 
-    // If current bit is 1:
-    if (command_array[i] == 1) {
-      if (previous != 1) { // If previous bit was 0, change pin state
-        transmitWaveformHigh(pulse_short);
-      } else { // If previous bit was already 1, only extend the delay
-        additionalDelay(pulse_long_additional);
-      }
-    }
-
-    previous = command_array[i];
-    */
       // If current bit is 0, transmit LOW-HIGH-LOW:
       if (command_array[i] == 0) {
         transmitWaveformLow(pulse_short);
@@ -344,13 +323,7 @@ void transmitWaveformLow(int delay_microseconds) {
   delayMicroseconds(delay_microseconds);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-/*
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void additionalDelay(int delay_microseconds) {
-  delayMicroseconds(delay_microseconds);
-}
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-*/
+
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 int convertStringToInt(String s) {
   char carray[2];
