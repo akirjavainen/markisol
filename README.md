@@ -5,7 +5,7 @@ I've automated a lot in my house, but there was still one thing that kept bother
 
 There are many reasons to control window shades from a program. For starters, automating them from Arduino/Raspberry Pi (scheduling, based on outside temperature and/or sunlight, based on home alarm Home/Away mode etc.) and voice commands from Alexa via TRIGGERcmd. I also control them remotely via SSH & HTTPS and wrote a PHP script for Raspberry Pi.
 
-Markisol products have been sold by The Home Depot, IKEA and also under the name Feelstyle, so this protocol may or may not work with other products. Unless I'm completely mistaken, each remote has its unique (or nearly unique) ID. However, I've included the pairing commands from my remotes, so you can simply pair them to your shades and take advantage of them directly. The purpose of this project was to get my own window shades automated, so there's more work to be done should you wish to fully reverse engineer the codes and generate + add new "virtual remotes". Specifically, checksum calculation needs to be figured out.
+Markisol products have been sold by The Home Depot, IKEA and also under the name Feelstyle, so this protocol may or may not work with other products. Unless I'm completely mistaken, each remote has its unique (or nearly unique) ID. However, I've included pairing commands from my remotes, so you can simply pair them to your shades and take advantage of the UP/DOWN commands directly. The purpose of this project was to get my own window shades automated, so there's more work to be done should you wish to fully reverse engineer the protocol and generate + add new "virtual remotes". Specifically, checksum calculation needs to be figured out.
 
 
 # Usage
