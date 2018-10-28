@@ -29,7 +29,7 @@
 * To view the waveform Arduino is transmitting (and debugging timings etc.), I found it easiest to connect the digital pin (13)
 * from Arduino -> 10K Ohm resistor -> USB sound card line-in. This way the waveform was as clear as the original.
 * 
-* This protocol and remotes like BF-305 and BF-101 are used by many different vendors and products. One such brand is Bofu.
+* This protocol and remotes like BF-101, BF-301 and BF-305 are used by many different vendors and products. One such brand is Bofu.
 * 
 * 
 * Tri-state encoding is used.
@@ -91,7 +91,7 @@
 * 01001100100010101 -- 0101 -- 111001111001 -- 10000101   = Change rotation direction 5
 * 
 * 
-* Remote 2 (model BF-101), single UP/STOP/DOWN, programmed for shades 1, 2 and 3 downstairs:
+* Remote 2 (model BF-101), single UP/STOP/DOWN, paired with shades 1, 2 and 3 downstairs:
 * 00100000000111011 -- 1011 -- 011111111100 -- 00001111   = Shades DOWN
 * 00100000000111011 -- 1011 -- 110011111100 -- 00000101   = Shades UP
 * 00100000000111011 -- 1011 -- 010111111100 -- 00001100   = Shades STOP
@@ -100,13 +100,31 @@
 * 00100000000111011 -- 1011 -- 111011111100 -- 00000110   = Change rotation direction
 * 
 *
-* Remote 3 (model BF-101), single UP/STOP/DOWN, programmed for shades 4 and 5 upstairs:
+* Remote 3 (model BF-101), single UP/STOP/DOWN, paired with shades 4 and 5 upstairs:
 * 00101011001101011 -- 1011 -- 011111111100 -- 01110001   = Shades DOWN
 * 00101011001101011 -- 1011 -- 110011111100 -- 01111100   = Shades UP
 * 00101011001101011 -- 1011 -- 010111111100 -- 01110011   = Shades STOP
 * 00101011001101011 -- 1011 -- 110111111100 -- 01111101   = Pair
 * 00101011001101011 -- 1011 -- 101111111100 -- 01111001   = Set limits
 * 00101011001101011 -- 1011 -- 111011111100 -- 01111111   = Change rotation direction
+* 
+* 
+* Remote 4 (model BF-301), single UP/STOP/DOWN, paired with guest room shades:
+* 01010001110101100 -- 0111 -- 011101111100 -- 00101011   = Shades DOWN
+* 01010001110101100 -- 0111 -- 110001111100 -- 00100001   = Shades UP
+* 01010001110101100 -- 0111 -- 010101111100 -- 00101000   = Shades STOP
+* 01010001110101100 -- 0111 -- 110101111100 -- 00100000   = Pair
+* 01010001110101100 -- 0111 -- 101101111100 -- 00100111   = Set limits
+* 01010001110101100 -- 0111 -- 111001111100 -- 00100010   = Change rotation direction
+*
+*
+* Remote 5 (model BF-301), single UP/STOP/DOWN, paired with bedroom shades:
+* 00100111000000010 -- 0111 -- 011101111100 -- 00111000   = Shades DOWN
+* 00100111000000010 -- 0111 -- 110001111100 -- 00110011   = Shades UP
+* 00100111000000010 -- 0111 -- 010101111100 -- 00111010   = Shades STOP
+* 00100111000000010 -- 0111 -- 110101111100 -- 00110010   = Pair
+* 00100111000000010 -- 0111 -- 101101111100 -- 00110100   = Set limits
+* 00100111000000010 -- 0111 -- 111001111100 -- 00110001   = Change rotation direction
 *
 *
 * End with LOW radio silence of 223 samples / sample rate = 5057 microseconds
@@ -171,6 +189,20 @@
 
 #define SHADE_CHANGE_DIRECTION_DOWNSTAIRS   "00100000000111011101111101111110000000110"
 #define SHADE_CHANGE_DIRECTION_UPSTAIRS     "00101011001101011101111101111110001111111"
+
+#define SHADE_DOWN_GUEST_ROOM                 "01010001110101100011101110111110000101011"
+#define SHADE_UP_GUEST_ROOM                   "01010001110101100011111000111110000100001"
+#define SHADE_STOP_GUEST_ROOM                 "01010001110101100011101010111110000101000"
+#define SHADE_PAIR_GUEST_ROOM                 "01010001110101100011111010111110000100000"
+#define SHADE_LIMIT_GUEST_ROOM                "01010001110101100011110110111110000100111"
+#define SHADE_CHANGE_DIRECTION_GUEST_ROOM     "01010001110101100011111100111110000100010"
+
+#define SHADE_DOWN_BEDROOM                 "00100111000000010011101110111110000111000"
+#define SHADE_UP_BEDROOM                   "00100111000000010011111000111110000110011"
+#define SHADE_STOP_BEDROOM                 "00100111000000010011101010111110000111010"
+#define SHADE_PAIR_BEDROOM                 "00100111000000010011111010111110000110010"
+#define SHADE_LIMIT_BEDROOM                "00100111000000010011110110111110000110100"
+#define SHADE_CHANGE_DIRECTION_BEDROOM     "00100111000000010011111100111110000110001"
 
 
 #define TRANSMIT_PIN          13      // We'll use digital 13 for transmitting
