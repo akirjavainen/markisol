@@ -29,8 +29,7 @@
 * To view the waveform Arduino is transmitting (and debugging timings etc.), I found it easiest to connect the digital pin (13)
 * from Arduino -> 10K Ohm resistor -> USB sound card line-in. This way the waveform was as clear as the original.
 * 
-* BF-305 and BF-101 seem like some kind of generic remotes, used by many different vendors and products. Are they all based on
-* this format? No idea. It's possible each individual vendor reprograms them, but this code may very well work with other brands.
+* This protocol and remotes like BF-305 and BF-101 are used by many different vendors and products. One such brand is Bofu.
 * 
 * 
 * Tri-state encoding is used.
@@ -348,7 +347,7 @@ void convertStringToArrayOfInt(String command, int *int_array, int command_array
   for (int i = 0; i < command_array_size; i++) {
       c = command.substring(i, i + 1);
 
-      if (c == "0" || c == "1") {
+      if (c == "0" || c == "1" || c == "2" || c == "3") { // 2 and 3 are allowed for doManchesterSend() (not used by this code)
         int_array[i] = convertStringToInt(c);
       } else {
         errorLog("convertStringToArrayOfInt(): Invalid character " + c + " in command.");
