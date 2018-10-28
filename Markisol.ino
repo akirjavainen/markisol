@@ -12,8 +12,8 @@
 * generate + add new "virtual remotes". Specifically, checksum calculation needs to be figured out.
 * 
 * USAGE:
-* 1. Set the shade into pairing mode by holding down its red P button until it shakes twice ("TA-TA").
-* 2. Send the pairing command from this code, eg. "sendMarkisolCommand(SHADE_PAIR_1);", which will shake the shade twice ("TA-TA").
+* 1. Set the shade into pairing mode by holding down its red P button until it shakes twice ("TA-TA") or beeps.
+* 2. Send the pairing command from this code, eg. "sendMarkisolCommand(SHADE_PAIR_1);", which will shake the shade twice ("TA-TA") or beep.
 * 3. Control the shade with that channel's codes, eg. sendMarkisolCommand(SHADE_DOWN_1); (or SHADE_UP_1, SHADE_STOP_1 etc.).
 * 
 * Setting limits is quicker and easier with the original remotes. Typically, limits are not lost even if you reset the shade
