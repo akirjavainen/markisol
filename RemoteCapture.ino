@@ -36,7 +36,7 @@ void loop()
   // *********************************************************************
   
   while (t < 2489 || t > 2495) {
-    t = pulseIn(RECEIVE_PIN, LOW, 1000000); // Finds HIGH waveform spots
+    t = pulseIn(RECEIVE_PIN, LOW, 1000000); // Waits for a HIGH waveform spike (low-HIGH-low)
   }
 
   if (DEBUG) {
@@ -51,7 +51,7 @@ void loop()
   // *********************************************************************
   
   while (t < 1574 || t > 1590) {
-    t = pulseIn(RECEIVE_PIN, HIGH, 1000000); // Finds LOW waveform spots
+    t = pulseIn(RECEIVE_PIN, HIGH, 1000000); // Waits for a LOW waveform spike (high-LOW-high)
   }
 
   if (DEBUG) {
@@ -64,12 +64,12 @@ void loop()
   // *********************************************************************
   // Command bits, locate them simply by HIGH waveform spikes:
   // *********************************************************************  
-  // 0 = 330-360 us
-  // 1 = 728-760 us
+  // 0 = 290-390 us
+  // 1 = 560-760 us
   // *********************************************************************
 
   while (i < 41) {
-    t = pulseIn(RECEIVE_PIN, LOW, 1000000); // Reads HIGH waveform spikes
+    t = pulseIn(RECEIVE_PIN, LOW, 1000000); // Waits for a HIGH waveform spike (low-HIGH-low)
     
     if (DEBUG) {
       Serial.print(t);
