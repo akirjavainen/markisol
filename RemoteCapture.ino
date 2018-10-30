@@ -76,11 +76,11 @@ void loop()
       Serial.print(": ");
     }
 
-    if (t > 560 && t < 760) { // Long spikes signal 1
+    if (t > 560 && t < 760) { // Found 1
       command += "1";
       if (DEBUG) Serial.println("1");
       
-    } else if (t > 290 && t < 390) { // Short spikes signal 0
+    } else if (t > 290 && t < 390) { // Found 0
       command += "0";
       if (DEBUG) Serial.println("0");
       
