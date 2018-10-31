@@ -1,5 +1,5 @@
 # Control Markisol protocol 433.92MHz motorized window shades from Arduino
-Compatible with iFit Spring Pro, Chinese brands like Bofu and remotes like BF-101, BF-301, BF-305, possibly others
+Compatible with iFit Spring Pro, Chinese brands like Bofu and remotes like BF-101, BF-301, BF-305, possibly others.
 
 http://www.markisolgroup.com/en/products/ifit.html
 
