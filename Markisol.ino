@@ -5,7 +5,7 @@
 * Also sold under the name Feelstyle and various Chinese brands like Bofu
 * Compatible with remotes like BF-101, BF-301, BF-305, possibly others
 * 
-* Protocol code by Antti Kirjavainen (antti.kirjavainen [_at_] gmail.com)
+* Code by Antti Kirjavainen (antti.kirjavainen [_at_] gmail.com)
 * 
 * http://www.markisolgroup.com/en/products/ifit.html
 * 
