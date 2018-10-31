@@ -28,7 +28,7 @@
 * 3. Now you can control the shade, eg. sendMarkisolCommand(SHADE_DOWN_EXAMPLE); (or SHADE_UP_EXAMPLE, SHADE_STOP_EXAMPLE etc.).
 * 
 * Setting limits is quicker with the remotes, although you can use your Arduino for that as well. Some motors do not erase the
-* the limits even if you reset them by holding down the red P button for 8-10 seconds.
+* the limits even if you reset them by holding down the P/SETTING button for 8-10 seconds.
 * 
 * 
 * PROTOCOL DESCRIPTION
