@@ -17,7 +17,7 @@ Markisol products have been sold by The Home Depot, IKEA and also under the name
 
 
 # How to use with example commands
-1. Set a shade into pairing mode by holding down its red P button until it shakes twice ("TA-TA") or beeps.
+1. Set a shade into pairing mode by holding down its P/SETTING button until it shakes twice ("TA-TA") or beeps.
 2. Send the pairing command, eg. "sendMarkisolCommand(SHADE_PAIR_EXAMPLE);", which will shake the shade twice ("TA-TA") or beep.
 3. Now you can control the shade, eg. sendMarkisolCommand(SHADE_DOWN_EXAMPLE); (or SHADE_UP_EXAMPLE, SHADE_STOP_EXAMPLE etc.).
  
