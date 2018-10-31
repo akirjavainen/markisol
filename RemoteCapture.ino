@@ -130,7 +130,7 @@ void loop()
   // *********************************************************************  
 
   // Correct data bits length is 41 bits, dismiss bad captures:
-  if (command.length() < 41 || command.length() > 41) {
+  if (command.length() != 41) {
     Serial.print("Bad capture, invalid command length ");
     Serial.println(command.length());
     if (ADDITIONAL) Serial.println("Invalid command: " + command);
