@@ -21,4 +21,4 @@ Markisol products have been sold by The Home Depot, IKEA and also under the name
 2. Send the pairing command, eg. "sendMarkisolCommand(SHADE_PAIR_EXAMPLE);", which will shake the shade twice ("TA-TA") or beep.
 3. Now you can control the shade, eg. sendMarkisolCommand(SHADE_DOWN_EXAMPLE); (or SHADE_UP_EXAMPLE, SHADE_STOP_EXAMPLE etc.).
  
-Setting limits is quicker with the remotes, although you can use your Arduino for that as well. Some motors do not erase the the limits even if you reset them by holding down the red P button for 8-10 seconds.
+Setting limits is quicker with the remotes, although you can use your Arduino for that as well. Some motors do not erase the the limits even if you reset them by holding down the P/SETTING button for 8-10 seconds.
