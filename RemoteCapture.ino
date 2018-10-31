@@ -1,12 +1,35 @@
+/*
+******************************************************************************************************************************************************************
+*
+* Markisol protocol remote control capture
+* Compatible with remotes like BF-101, BF-301, BF-305, possibly others
+* 
+* Code by Antti Kirjavainen (antti.kirjavainen [_at_] gmail.com)
+* 
+* Use this code to capture the commands from your remotes. Outputs to serial.
+* What you need for mastering your shades are 41 bits commands. Protocol is
+* described in Markisol.ino.
+* 
+* 
+* HOW TO USE
+* 
+* Plug a 433.92MHz receiver to digital pin 2 and start pressing buttons
+* from your original remotes (copy pasting them to Markisol.ino).
+*
+******************************************************************************************************************************************************************
+*/
+
+
 
 // Plug your 433.92MHz receiver to digital pin 2:
 #define RECEIVE_PIN   2
 
 // Enable debug mode if there's no serial output or if you're modifying this code for
 // another protocol/device. However, note that serial output delays receiving, causing
-// capture to fail. So keep debug disabled unless absolutely required:
+// data bits capture to fail. So keep debug disabled unless absolutely required:
 #define DEBUG         false
-#define ADDITIONAL    false    // Display some additional information after capture
+#define ADDITIONAL    false    // Display some additional info after capture
+
 
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -24,15 +47,17 @@ void loop()
   unsigned long t = 0;
 
 
-  // As a quick hack, add the leading 0 here,
-  // as the way I wrote the code is missing it.
-  // Every Markisol protocol command starts with it,
-  // so function-wise it's not a big deal:
+  // As a quick hack, we add the leading 0 here.
+  // The way I wrote the code misses the first data bit.
+  // However, every Markisol protocol command starts with
+  // it, so function-wise it's not a big deal:
   String command = "0";
 
 
   // *********************************************************************
-  // Wait for first AGC bit:
+  // Wait for the first AGC bit:
+  // *********************************************************************
+  // Between 2489-2495 us
   // *********************************************************************
   
   while (t < 2489 || t > 2495) {
@@ -48,6 +73,8 @@ void loop()
 
   // *********************************************************************
   // Wait for second AGC bit:
+  // *********************************************************************
+  // Between 1574-1590 us
   // *********************************************************************
   
   while (t < 1574 || t > 1590) {
@@ -102,7 +129,7 @@ void loop()
   // Done! Display results:
   // *********************************************************************  
 
-  // Correct command length is 41 bits, dismiss bad captures:
+  // Correct data bits length is 41 bits, dismiss bad captures:
   if (command.length() < 41 || command.length() > 41) {
     Serial.print("Bad capture, invalid command length ");
     Serial.println(command.length());
