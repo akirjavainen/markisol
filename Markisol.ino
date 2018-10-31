@@ -23,7 +23,7 @@
 * 
 * HOW TO USE WITH EXAMPLE COMMANDS
 * 
-* 1. Set the shade into pairing mode by holding down its red P button until it shakes twice ("TA-TA") or beeps.
+* 1. Set the shade into pairing mode by holding down its P/SETTING button until it shakes twice ("TA-TA") or beeps.
 * 2. Send the pairing command, eg. "sendMarkisolCommand(SHADE_PAIR_EXAMPLE);", which will shake the shade twice ("TA-TA") or beep.
 * 3. Now you can control the shade, eg. sendMarkisolCommand(SHADE_DOWN_EXAMPLE); (or SHADE_UP_EXAMPLE, SHADE_STOP_EXAMPLE etc.).
 * 
@@ -119,7 +119,7 @@ void setup() {
 void loop() {
 
   // Pair a shade (first set the shade to pairing mode by holding
-  // down its red P button until the "TA-TA"):
+  // down its P/SETTING button until the "TA-TA"):
   //sendMarkisolCommand(SHADE_PAIR_EXAMPLE);
   //while (true) {} // Stop after pairing, you can use UP/STOP/DOWN commands afterwards
   // ---
