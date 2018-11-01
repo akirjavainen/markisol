@@ -10,7 +10,7 @@
 
 
 #!/bin/bash
-export DEVICE=/dev/ttyACM0 # Could also be /dev/ttyUSB0 on some systems
+export DEVICE=/dev/ttyACM0 # Could also be /dev/ttyUSB*
 
 if [ ! -n "$1" ]; then echo "Usage: $0 [command]"; exit; fi
 
@@ -21,7 +21,7 @@ echo "<$1>" >$DEVICE
 * Then trigger with "433trigger.sh MY_OWN_COMMAND".
 * Add your commands and actions to show_new_data_received().
 *
-* Note that if your Arduino shows up as ttyUSB* (eg. ttyUSB0), you may need to
+* NOTE: If your Arduino shows up as ttyUSB* (eg. ttyUSB0), you may need to
 * "cat /dev/ttyUSB0" on another terminal for the serial interface to react.
 * This is related to the serial protocol itself.
 *
