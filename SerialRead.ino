@@ -61,10 +61,16 @@ void show_new_data_received() {
 
       Serial.println(received_data);
 
+      // *********************************************************************
       // Add your own commands here and what to do with them (without the headers <>):
-      if (char_array_contains(received_data, "MY_OWN_COMMAND") > 0) {
+      // *********************************************************************
+      if (char_array_contains(received_data, "MY_OWN_COMMAND_1") > 0) {
+        Serial.println("My own command received.");
+      }    
+      if (char_array_contains(received_data, "MY_OWN_COMMAND_2") > 0) {
         Serial.println("My own command received.");
       }
+      // *********************************************************************
     } 
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
