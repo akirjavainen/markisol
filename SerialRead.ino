@@ -2,7 +2,7 @@
 ******************************************************************************************************************************************************************
 *
 * Arduino serial read example
-* Receiving commands from serial, eg. connecting Raspberry Pi or
+* Receiving commands from serial, e.g. connecting Raspberry Pi or
 * other systems with Arduino
 *
 * HOW TO USE
