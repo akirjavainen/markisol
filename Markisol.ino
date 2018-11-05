@@ -53,7 +53,7 @@
 * 
 * Command is as follows:
 * 17 bits for (unique) remote control ID, hard coded in remotes
-* 4 bits for channel ID: 1 = 0111 (also used by BF-301), 2 = 1011 (also used by BF-101), 3 = 0011, 4 = 1101, 5 = 0101
+* 4 bits for channel ID: 1 = 0111 (also used by BF-301), 2 = 1011 (also used by BF-101), 3 = 0011, 4 = 1101, 5 = 0101, ALL = 0000
 * 4 bits for command: DOWN = 0111, UP = 1100, STOP = 0101, CONFIRM/PAIR = 1101, LIMITS = 1011, ROTATION DIRECTION = 1110
 * 8 bits for remote control model: BF-305 multi = 01111001, BF-101 single = 11111100, BF-301 single = 01111100
 * 8 bits for checksum (CRC): I have yet to figure out how this is formed
@@ -68,8 +68,8 @@
 * Commands were captured by a "poor man's oscillator": 433.92MHz receiver unit (data pin) -> 10K Ohm resistor -> USB sound card line-in.
 * Try that at your own risk. Power to the 433.92MHz receiver unit was provided by Arduino (connected to 5V and GND).
 *
-* To view the waveform Arduino is transmitting (and debugging timings etc.), I found it easiest to connect the digital pin (13)
-* from Arduino -> 10K Ohm resistor -> USB sound card line-in. This way the waveform was as clear as the original.
+* To view the waveform Arduino is transmitting (and debugging timings etc.), I found it easiest to directly connect the digital pin (13)
+* from Arduino -> 10K Ohm resistor -> USB sound card line-in. This way the waveform was very clear.
 * 
 ******************************************************************************************************************************************************************
 */
@@ -84,9 +84,9 @@
 #define SHADE_LIMIT_EXAMPLE                "01010001110101100011110110111110000100111" // L button
 #define SHADE_CHANGE_DIRECTION_EXAMPLE     "01010001110101100011111100111110000100010" // STOP + L buttons
 
-#define TRANSMIT_PIN          13      // We'll use digital 13 for transmitting
-#define REPEAT_COMMAND        8       // How many times to repeat the same command: original remotes repeat 8 (multi) or 10 (single) times by default
-#define DEBUG                 false   // Do note that if you add serial output during transmit, it will cause delay and commands may fail
+#define TRANSMIT_PIN                       13   // We'll use digital 13 for transmitting
+#define REPEAT_COMMAND                      8   // How many times to repeat the same command: original remotes repeat 8 (multi) or 10 (single) times by default
+#define DEBUG                           false   // Do note that if you add serial output during transmit, it will cause delay and commands may fail
 
 // If you wish to use PORTB commands instead of digitalWrite, these are for Arduino Uno digital 13:
 #define D13high | 0x20; 
@@ -119,7 +119,7 @@ void setup() {
 void loop() {
 
   // Pair a shade (first set the shade to pairing mode by holding
-  // down its P/SETTING button until the "TA-TA"):
+  // down its P/SETTING button until the "TA-TA" or a beep):
   //sendMarkisolCommand(SHADE_PAIR_EXAMPLE);
   //while (true) {} // Stop after pairing, you can use UP/STOP/DOWN commands afterwards
   // ---
@@ -165,7 +165,7 @@ void sendMarkisolCommand(String command) {
 
   // Disable output to transmitter to prevent interference with
   // other devices. Otherwise the transmitter will keep on transmitting,
-  // which will disrupt most appliances operating on the 433.92MHz band:
+  // disrupting most appliances operating on the 433.92MHz band:
   digitalWrite(TRANSMIT_PIN, LOW);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -200,7 +200,7 @@ void doMarkisolTribitSend(int *command_array, int command_array_size, int pulse_
    }
 
   // Radio silence at the end.
-  // It's better to rather go a bit over than under required length.
+  // It's better to go a bit over than under minimum required length:
   transmitWaveformLow(pulse_radio_silence);
   
   if (DEBUG) {
