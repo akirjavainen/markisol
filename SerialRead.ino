@@ -6,7 +6,7 @@
 * other systems with Arduino
 *
 * HOW TO USE
-* Create a bash script called "433trigger.sh" to simplify sending commands:
+* Create a bash script called "433trigger.sh" to simplify use:
 
 
 #!/bin/bash
@@ -23,7 +23,6 @@ echo "<$1>" >$DEVICE
 *
 * NOTE: If your Arduino shows up as ttyUSB* (eg. ttyUSB0), you may need to
 * "cat /dev/ttyUSB0" on another terminal for the serial interface to react.
-* This is related to the serial protocol itself.
 *
 ******************************************************************************************************************************************************************
 */
@@ -49,7 +48,7 @@ void setup()
 void loop()
 {
   receive_new_data();
-  show_new_data_received(); // Required in 2 places for serial read to work
+  show_new_data_received(); // Required here and in receive_new_data()
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -64,11 +63,11 @@ void show_new_data_received() {
       // *********************************************************************
       // Add your own commands here and what to do with them (without the headers <>):
       // *********************************************************************
-      if (char_array_contains(received_data, "MY_OWN_COMMAND_1") > 0) {
+      if (char_array_contains(received_data, "MY_OWN_COMMAND_1")) {
         Serial.println("My own command received.");
       }
       // *********************************************************************
-      if (char_array_contains(received_data, "MY_OWN_COMMAND_2") > 0) {
+      if (char_array_contains(received_data, "MY_OWN_COMMAND_2")) {
         Serial.println("My own command received.");
       }
       // *********************************************************************
@@ -110,24 +109,24 @@ void receive_new_data() {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-char char_array_contains(char *str, char *str_find) {
-    char i = 0;
-    char found = 0;
-    char length = strlen(str);
+boolean char_array_contains(char *str, char *str_find) {
+  char i = 0;
+  char found = 0;
+  char length = strlen(str);
     
-    if (strlen(str_find) > length) return 0;
+  if (strlen(str_find) > length) return false;
 
-    while (i < length) {
-        if (str[i] == str_find[found]) {
-            found++;       
-      if (strlen(str_find) == found) return 1;
+  while (i < length) {
+    if (str[i] == str_find[found]) {
+      found++;       
+      if (strlen(str_find) == found) return true;
 
-        } else {
-            found = 0;
-        }
-
-        i++;
+    } else {
+      found = 0;
     }
-    return 0;
+
+    i++;
+  }
+  return false;
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
