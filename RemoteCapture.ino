@@ -6,9 +6,9 @@
 * 
 * Code by Antti Kirjavainen (antti.kirjavainen [_at_] gmail.com)
 * 
-* Use this code to capture the commands from your remotes. Outputs to serial.
-* What you need for mastering your shades are 41 bits commands. Protocol is
-* described in Markisol.ino.
+* Use this code to capture the commands from your remotes. Outputs to serial
+* (Tools -> Serial Monitor). What you need for mastering your shades are 41
+* bits commands. Protocol is described in Markisol.ino.
 * 
 * 
 * HOW TO USE
@@ -26,7 +26,7 @@
 
 // Enable debug mode if there's no serial output or if you're modifying this code for
 // another protocol/device. However, note that serial output delays receiving, causing
-// data bits capture to fail. So keep debug disabled unless absolutely required:
+// data bit capture to fail. So keep debug disabled unless absolutely required:
 #define DEBUG         false
 #define ADDITIONAL    false    // Display some additional info after capture
 
@@ -165,9 +165,12 @@ String printChannel(String channel) {
 
   } else if (channel == "0101") {
       return "5";
+
+  } else if (channel == "0000") {
+      return "ALL";
   }
 
-  return "UNKNOWN";
+  return "UNKNOWN/NEW";
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
