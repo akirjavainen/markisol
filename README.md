@@ -3,7 +3,7 @@ Compatible with iFit Spring Pro, Chinese brands like Bofu and remotes like BF-10
 
 http://www.markisolgroup.com/en/products/ifit.html
 
-I've automated a lot in my house, but there was still one thing that kept bothering me: the window shades. I've had motorized shades for a long time, but they would only work with their own remotes. I have 5 remote controls: one (model BF-305) can control all 5 separately. Four of the remotes (models BF-101 and BF-301) would normally control a single shade, but they're easy to pair with more (so 2-3 shades roll down at the same time).
+I've automated a lot in my house, but there was that one thing that kept bothering me: the window shades. I've had motorized shades for a long time, but they would only work with their own remotes. I have 5 remote controls: one (model BF-305) can control all 5 separately. Four of the remotes (models BF-101 and BF-301) would normally control a single shade, but they're easy to pair with more (so 2-3 shades roll down at the same time).
 
 There are many reasons to control window shades from a program. For starters, automating them from Arduino/Raspberry Pi (scheduling, based on outside temperature and/or sunlight, based on home alarm Home/Away mode etc.) and voice commands from Alexa via TRIGGERcmd. I also control them remotely via SSH & HTTPS and wrote a PHP script for Raspberry Pi, enabling control from browsers and mobile phones.
 
