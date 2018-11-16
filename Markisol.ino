@@ -12,7 +12,7 @@
 * Unless I'm completely mistaken, each remote has its unique, hard coded ID. I've included all commands from one remote as an
 * example, but you can also use RemoteCapture.ino to capture your own remotes. The purpose of this project was to get my own
 * window shades automated, so there's more work to be done should you wish to fully reverse engineer the codes and generate
-* + add new "virtual remotes". Specifically, checksum calculation needs to be figured out.
+* + add new "virtual remotes". Specifically, checksum calculation needs to be deciphered.
 * 
 * 
 * HOW TO USE
@@ -28,7 +28,8 @@
 * 3. Now you can control the shade, eg. sendMarkisolCommand(SHADE_DOWN_EXAMPLE); (or SHADE_UP_EXAMPLE, SHADE_STOP_EXAMPLE etc.).
 * 
 * Setting limits is quicker with the remotes, although you can use your Arduino for that as well. Some motors do not erase the
-* the limits even if you reset them by holding down the P/SETTING button for 8-10 seconds.
+* the limits even if you reset them by holding down the P/SETTING button for 8-10 seconds. They just reset the list of registered
+* remote controls.
 * 
 * 
 * PROTOCOL DESCRIPTION
