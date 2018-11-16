@@ -15,6 +15,12 @@
 * 
 * Plug a 433.92MHz receiver to digital pin 2 and start pressing buttons
 * from your original remotes (copy pasting them to Markisol.ino).
+* 
+* 
+* NOTE ABOUT THE L (LIMITS) BUTTON
+* 
+* You have to hold down this button for 5-6 seconds before the remote
+* starts transmitting.
 *
 ******************************************************************************************************************************************************************
 */
@@ -57,11 +63,15 @@ void loop()
   // *********************************************************************
   // Wait for the first AGC bit:
   // *********************************************************************
-  // HIGH between 2489-2495 us
+  // HIGH between 2430-2495 us
   // *********************************************************************
   
-  while (t < 2489 || t > 2495) {
+  while (t < 2430 || t > 2495) {
     t = pulseIn(RECEIVE_PIN, LOW, 1000000); // Waits for a HIGH waveform spike (low-HIGH-low)
+
+    if (DEBUG) { // For finding AGC timings
+      if (t > 2000 && t < 3000) Serial.println(t);
+    }
   }
 
   if (DEBUG) {
@@ -77,8 +87,12 @@ void loop()
   // LOW between 1574-1590 us
   // *********************************************************************
   
-  while (t < 1574 || t > 1590) {
+  while (t < 1290 || t > 1640) {
     t = pulseIn(RECEIVE_PIN, HIGH, 1000000); // Waits for a LOW waveform spike (high-LOW-high)
+
+    if (DEBUG) { // For finding AGC timings
+      if (t > 1000 && t < 2000) Serial.println(t);
+    }
   }
 
   if (DEBUG) {
