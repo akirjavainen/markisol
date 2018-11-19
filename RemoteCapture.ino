@@ -19,7 +19,7 @@
 * 
 * NOTE ABOUT THE L (LIMITS) BUTTON
 * 
-* You have to hold down this button for 5-6 seconds before the remote
+* You have to hold down this button for 6 seconds before the remote
 * starts transmitting.
 *
 ******************************************************************************************************************************************************************
@@ -152,11 +152,16 @@ void loop()
     
   } else {
     Serial.println("Successful capture, command is: " + command);
-    Serial.println("Remote control (unique) ID: " + command.substring(0, 17));
+    Serial.print("Remote control (unique) ID: ");
+    Serial.println(convertBinaryStringToInt(command.substring(0, 17)), DEC);
     Serial.println("Channel: " + printChannel(command.substring(17, 21)));
     Serial.println("Command: " + printCommand(command.substring(21, 25)));
     Serial.println("Remote control model: " + printRemoteModel(command.substring(25, 33)));
-    if (ADDITIONAL) Serial.println("Checksum (CRC): " + command.substring(33, 41));
+    
+    if (ADDITIONAL) {
+      Serial.print("Checksum (CRC): ");
+      Serial.println(convertBinaryStringToInt(command.substring(33, 41)), DEC);
+    }
     Serial.println();
   }
 }
@@ -165,25 +170,29 @@ void loop()
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 String printChannel(String channel) {
 
-  if (channel == "0111") {
+  int c = convertBinaryStringToInt(channel);
+
+  switch (c) {
+
+    case 0x7: // 0111
       return "1"; // ...or remote model BF-301
 
-  } else if (channel == "1011") {
+    case 0xB: // 1011
       return "2"; // ...or remote model BF-101
 
-  } else if (channel == "0011") {
+    case 0x3: // 0011
       return "3";
 
-  } else if (channel == "1101") {
+    case 0xD: // 1101
       return "4";
 
-  } else if (channel == "0101") {
+    case 0x5: // 0101
       return "5";
 
-  } else if (channel == "0000") {
+    case 0x0: // 0000
       return "ALL";
-  }
 
+  }
   return "UNKNOWN/NEW";
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -191,25 +200,29 @@ String printChannel(String channel) {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 String printCommand(String command) {
 
-  if (command == "0111") {
+  int c = convertBinaryStringToInt(command);
+
+  switch (c) {
+    
+    case 0x7: // 0111
       return "DOWN";
 
-  } else if (command == "1100") {
+    case 0xC: // 1100
       return "UP";
 
-  } else if (command == "0101") {
+    case 0x5: // 0101
       return "STOP";
 
-  } else if (command == "1101") {
+    case 0xD: // 1101
       return "PAIR/CONFIRM (C)";
 
-  } else if (command == "1011") {
+    case 0xB: // 1011
       return "PROGRAM LIMITS (L)";
 
-  } else if (command == "1110") {
+    case 0xE: // 1110
       return "CHANGE DIRECTION OF ROTATION (STOP + L)";
-  }
 
+  }
   return "UNKNOWN";
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -217,16 +230,47 @@ String printCommand(String command) {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 String printRemoteModel(String model) {
 
-  if (model == "01111001") {
-      return "BF-305 (5 channels)";
-  
-  } else if (model == "11111100") {
-      return "BF-101 (single channel)";
-      
-  } else if (model == "01111100") {
-      return "BF-301 (single channel)";
-  }
+  int c = convertBinaryStringToInt(model);
 
+  switch (c) {
+
+    case 0x79: // 01111001
+      return "BF-305 (5 channels)";
+
+    case 0xFC: // 11111100
+      return "BF-101 (single channel)";
+
+    case 0x7C: // 01111100
+      return "BF-301 (single channel)";
+      
+  }
   return "UNKNOWN/NEW";
+}
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+long convertBinaryStringToInt(String s) {
+  int c = 0;
+  long b = 0;
+  
+  for (int i = 0; i < s.length(); i++) {
+    c = convertStringToInt(s.substring(i, i + 1));
+    b = b << 1;
+    b += c;
+  }
+  
+  return b;
+}
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+int convertStringToInt(String s) {
+  char carray[2];
+  int i = 0;
+  
+  s.toCharArray(carray, sizeof(carray));
+  i = atoi(carray);
+
+  return i;
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
