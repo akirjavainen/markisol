@@ -8,10 +8,7 @@
 * Code by Antti Kirjavainen (antti.kirjavainen [_at_] gmail.com)
 *
 * This is a Python implementation of the Markisol protocol, for
-* the Raspberry Pi. Note that I have never tested this code. I've
-* written it based on the (working) code for Arduino. The code may
-* or may not work at all. It's possible that timings need to be
-* modified for the Pi or that there are other issues.
+* the Raspberry Pi. Plug your transmitter to BOARD PIN 16 (BCM/GPIO23).
 *
 * HOW TO USE
 * ./Markisol.py [41-bit_binary_string]
@@ -27,15 +24,17 @@ import os
 import RPi.GPIO as GPIO
 
 
-TRANSMIT_PIN = 23
+TRANSMIT_PIN = 16  # BCM PIN 23 (GPIO23, BOARD PIN 16)
 REPEAT_COMMAND = 8
 
-MARKISOL_AGC1_PULSE = 0.02410
-MARKISOL_AGC2_PULSE = 0.01320
-MARKISOL_RADIO_SILENCE = 0.05045
 
-MARKISOL_PULSE_SHORT = 0.00300
-MARKISOL_PULSE_LONG = 0.00680
+# Microseconds (us) converted to seconds for time.sleep() function:
+MARKISOL_AGC1_PULSE = 0.00241
+MARKISOL_AGC2_PULSE = 0.00132
+MARKISOL_RADIO_SILENCE = 0.005045
+
+MARKISOL_PULSE_SHORT = 0.0003
+MARKISOL_PULSE_LONG = 0.00068
 
 MARKISOL_COMMAND_BIT_ARRAY_SIZE = 41
 
@@ -49,7 +48,7 @@ def sendMarkisolCommand(command):
         printUsage()
 
     # Prepare:
-    GPIO.setmode(GPIO.BCM)
+    GPIO.setmode(GPIO.BOARD)
     GPIO.setup(TRANSMIT_PIN, GPIO.OUT)
 
     # Send command:
@@ -90,14 +89,14 @@ def doMarkisolTribitSend(command):
 
 # ------------------------------------------------------------------
 def transmitWaveformHigh(delay):
-    GPIO.output(TRANSMIT_PIN, 0)  # Invert to 1 if required
+    GPIO.output(TRANSMIT_PIN, GPIO.LOW)  # GPIO pin LOW transmits a HIGH waveform
     time.sleep(delay)
 # ------------------------------------------------------------------
 
 
 # ------------------------------------------------------------------
 def transmitWaveformLow(delay):
-    GPIO.output(TRANSMIT_PIN, 1)  # Invert to 0 if required
+    GPIO.output(TRANSMIT_PIN, GPIO.HIGH)  # GPIO pin HIGH transmits a LOW waveform
     time.sleep(delay)
 # ------------------------------------------------------------------
 
@@ -116,7 +115,7 @@ def printUsage():
 # ------------------------------------------------------------------
 def exitProgram():
     # Disable output to transmitter and clean up:
-    GPIO.output(TRANSMIT_PIN, 0)
+    GPIO.output(TRANSMIT_PIN, GPIO.LOW)
     GPIO.cleanup()
     exit()
 # ------------------------------------------------------------------
