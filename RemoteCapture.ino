@@ -151,15 +151,16 @@ void loop()
     Serial.println();
     
   } else {
-    Serial.println("Successful capture, command is: " + command);
-    Serial.print("Remote control (unique) ID: ");
-    Serial.println(convertBinaryStringToInt(command.substring(0, 17)), DEC);
+    Serial.println("Successful capture, full command is: " + command);
+    Serial.println("Remote control (unique) ID: " + command.substring(0, 17));
     Serial.println("Channel: " + printChannel(command.substring(17, 21)));
     Serial.println("Command: " + printCommand(command.substring(21, 25)));
     Serial.println("Remote control model: " + printRemoteModel(command.substring(25, 33)));
     
     if (ADDITIONAL) {
-      Serial.print("Checksum (CRC): ");
+      Serial.print("Remote control ID (DEC): ");
+      Serial.println(convertBinaryStringToInt(command.substring(0, 17)), DEC);
+      Serial.print("Trailing bits: ");
       Serial.println(convertBinaryStringToInt(command.substring(33, 41)), DEC);
     }
     Serial.println();
