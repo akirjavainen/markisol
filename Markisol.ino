@@ -9,16 +9,22 @@
 * 
 * http://www.markisolgroup.com/en/products/ifit.html
 * 
-* Unless I'm completely mistaken, each remote has its unique, hard coded ID. I've included all commands from one remote as an
-* example, but you can also use RemoteCapture.ino to capture your own remotes. The purpose of this project was to get my own
-* window shades automated, so there's more work to be done should you wish to fully reverse engineer the codes and generate
-* + add new "virtual remotes". Specifically, checksum calculation needs to be deciphered.
+* Unless I'm completely mistaken, each remote has its unique, hard coded ID. I've included all commands from one as an
+* example, but you can use RemoteCapture.ino to capture your own remotes. The purpose of this project was to get my own
+* window shades automated, so there's a bit more work to be done, to reverse engineer the final 8 bits of the commands.
+* I don't know how they're formed, but the motors just seem to ignore them anyway. You could zero them out (as well as
+* the previous 8 bits for the remote model) and command the shades with 25 bit commands. If you only have single channel
+* remotes (BF-301 for example), you can zero out the 4 bits for channel as well. In fact, only the 17 bit remote ID and
+* the 4 bit command are actually required in most cases.
 * 
 * 
 * HOW TO USE
 * 
 * Capture your remote controls with RemoteCapture.ino and copy paste the 41 bit commands to Markisol.ino for sendMarkisolCommand().
 * More info about this provided in RemoteCapture.ino.
+* 
+* If you have no multichannel remotes like the BF-305, you can also call the sendShortMarkisolCommand() function with
+* your 17 bit remote ID and a command (see setup() below for more info).
 * 
 * 
 * HOW TO USE WITH EXAMPLE COMMANDS
@@ -57,7 +63,7 @@
 * 4 bits for channel ID: 1 = 0111 (also used by BF-301), 2 = 1011 (also used by BF-101), 3 = 0011, 4 = 1101, 5 = 0101, ALL = 0000
 * 4 bits for command: DOWN = 0111, UP = 1100, STOP = 0101, CONFIRM/PAIR = 1101, LIMITS = 1011, ROTATION DIRECTION = 1110
 * 8 bits for remote control model: BF-305 multi = 01111001, BF-101 single = 11111100, BF-301 single = 01111100
-* 8 bits for checksum (CRC): I have yet to figure out how this is formed
+* 8 bits for something? I have yet to figure out how this is formed, but no motor seems to care if I simply zero them out
 * = 41 bits in total
 *
 * There is a short HIGH spike of 80 us at the end, but it is not necessary to replicate.
@@ -66,11 +72,14 @@
 * 
 * HOW THIS WAS STARTED
 * 
-* Commands were captured by a "poor man's oscillator": 433.92MHz receiver unit (data pin) -> 10K Ohm resistor -> USB sound card line-in.
+* Project started with a "poor man's oscilloscope": 433.92MHz receiver unit (data pin) -> 10K Ohm resistor -> USB sound card line-in.
 * Try that at your own risk. Power to the 433.92MHz receiver unit was provided by Arduino (connected to 5V and GND).
 *
 * To view the waveform Arduino is transmitting (and debugging timings etc.), I found it easiest to directly connect the digital pin (13)
 * from Arduino -> 10K Ohm resistor -> USB sound card line-in. This way the waveform was very clear.
+* 
+* Note that the waveform captured by Audacity is basically "upside down". This code was written without using Audacity's Effects -> Invert
+* (LOW/HIGH are inverted in the functions below).
 * 
 ******************************************************************************************************************************************************************
 */
@@ -92,6 +101,18 @@
 // If you wish to use PORTB commands instead of digitalWrite, these are for Arduino Uno digital 13:
 #define D13high | 0x20; 
 #define D13low  & 0xDF; 
+
+// For sendShortMarkisolCommand():
+//#define MY_REMOTE_ID_1                    "00000000000000000"   // Enter your 17 bit remote ID here or make up a binary number and confirm/pair it with the motor
+#define DEFAULT_CHANNEL                     "0000"                // Channel information is only required for multichannel remotes like the BF-305
+#define DEFAULT_REMOTE_MODEL                "01111100"            // We default to BF-301, but this is actually ignored by motors and could be plain zeroes
+#define DEFAULT_TRAILING_BITS               "00000000"            // Last 8 bits of the command. What do they mean? No idea. Again, ignored by motors.
+#define COMMAND_DOWN                        "0111"                // Remote button DOWN
+#define COMMAND_UP                          "1100"                // Remote button UP
+#define COMMAND_STOP                        "0101"                // Remote button STOP
+#define COMMAND_PAIR                        "1101"                // Remote button C
+#define COMMAND_PROGRAM_LIMITS              "1011"                // Remote button L
+#define COMMAND_CHANGE_ROTATION_DIRECTION   "1110"                // Remote buttons STOP + L
 
 // Timings in microseconds (us). Get sample count by zooming all the way in to the waveform with Audacity.
 // Calculate microseconds with: (samples / sample rate, usually 44100 or 48000) - ~15-20 to compensate for delayMicroseconds overhead.
@@ -128,18 +149,32 @@ void loop() {
 
   // Send DOWN/STOP/UP commands after pairing:
   //sendMarkisolCommand(SHADE_DOWN_EXAMPLE);
-  delay(3000);
+  //delay(3000);
   
   //sendMarkisolCommand(SHADE_STOP_EXAMPLE);
-  delay(3000);
+  //delay(3000);
   
   //sendMarkisolCommand(SHADE_UP_EXAMPLE);
-  delay(3000);
+  //delay(3000);
+
+
+  // --- Short commands ---
+  // If your remote is single channel (like the BF-301), you only need the remote ID.
+  // You can make up your own "virtual" ID, too. In that case, just set the motor to
+  // pairing mode and transmit COMMAND_PAIR first:
+
+  //sendShortMarkisolCommand(MY_REMOTE_ID_1, COMMAND_PAIR);
+  //while (true) {} // Stop after pairing
+  // ---
+  
+  //sendShortMarkisolCommand(MY_REMOTE_ID_1, COMMAND_DOWN);
+  //delay(3000);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void sendMarkisolCommand(String command) {
+  
   // Prepare for transmitting and check for validity
   pinMode(TRANSMIT_PIN, OUTPUT); // Prepare the digital pin for output
   
@@ -168,6 +203,23 @@ void sendMarkisolCommand(String command) {
   // other devices. Otherwise the transmitter will keep on transmitting,
   // disrupting most appliances operating on the 433.92MHz band:
   digitalWrite(TRANSMIT_PIN, LOW);
+}
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+void sendShortMarkisolCommand(String remote_id, String command) {
+  
+  if (remote_id.length() != 17) {
+    errorLog("sendShortMarkisolCommand(): Correct remote ID length is 17 bits. Cannot continue.");
+    return;
+  }
+  if (command.length() != 4) {
+    errorLog("sendShortMarkisolCommand(): Correct command length is 4 bits. Cannot continue.");
+    return;
+  }
+
+  // Let's form and transmit the full command:
+  sendMarkisolCommand(remote_id + DEFAULT_CHANNEL + command + DEFAULT_REMOTE_MODEL + DEFAULT_TRAILING_BITS);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
