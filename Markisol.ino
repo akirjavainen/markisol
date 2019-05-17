@@ -196,7 +196,7 @@ void sendMarkisolCommand(String command) {
   
   // Repeat the command:
   for (int i = 0; i < REPEAT_COMMAND; i++) {
-    doMarkisolTribitSend(command_array, MARKISOL_COMMAND_BIT_ARRAY_SIZE, MARKISOL_AGC1_PULSE, MARKISOL_AGC2_PULSE, MARKISOL_RADIO_SILENCE, MARKISOL_PULSE_SHORT, MARKISOL_PULSE_LONG);
+    doMarkisolTribitSend(command_array);
   }
 
   // Disable output to transmitter to prevent interference with
@@ -224,7 +224,7 @@ void sendShortMarkisolCommand(String remote_id, String command) {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void doMarkisolTribitSend(int *command_array, int command_array_size, int pulse_agc1, int pulse_agc2, int pulse_radio_silence, int pulse_short, int pulse_long) {
+void doMarkisolTribitSend(int *command_array) {
 
   if (command_array == NULL) {
     errorLog("doMarkisolTribitSend(): Array pointer was NULL, cannot continue.");
@@ -232,34 +232,34 @@ void doMarkisolTribitSend(int *command_array, int command_array_size, int pulse_
   }
 
   // Starting (AGC) bits:
-  transmitWaveformHigh(pulse_agc1);
-  transmitWaveformLow(pulse_agc2);
+  transmitWaveformHigh(MARKISOL_AGC1_PULSE);
+  transmitWaveformLow(MARKISOL_AGC2_PULSE);
 
   // Transmit command:
-  for (int i = 0; i < command_array_size; i++) {
+  for (int i = 0; i < MARKISOL_COMMAND_BIT_ARRAY_SIZE; i++) {
 
       // If current bit is 0, transmit LOW-HIGH-LOW:
       if (command_array[i] == 0) {
-        transmitWaveformLow(pulse_short);
-        transmitWaveformHigh(pulse_short);
-        transmitWaveformLow(pulse_short);
+        transmitWaveformLow(MARKISOL_PULSE_SHORT);
+        transmitWaveformHigh(MARKISOL_PULSE_SHORT);
+        transmitWaveformLow(MARKISOL_PULSE_SHORT);
       }
 
       // If current bit is 1, transmit HIGH-HIGH-LOW:
       if (command_array[i] == 1) {
-        transmitWaveformHigh(pulse_long);
-        transmitWaveformLow(pulse_short);
+        transmitWaveformHigh(MARKISOL_PULSE_LONG);
+        transmitWaveformLow(MARKISOL_PULSE_SHORT);
       }   
    }
 
   // Radio silence at the end.
   // It's better to go a bit over than under minimum required length:
-  transmitWaveformLow(pulse_radio_silence);
+  transmitWaveformLow(MARKISOL_RADIO_SILENCE);
   
   if (DEBUG) {
     Serial.println();
     Serial.print("Transmitted ");
-    Serial.print(command_array_size);
+    Serial.print(MARKISOL_COMMAND_BIT_ARRAY_SIZE);
     Serial.println(" bits.");
     Serial.println();
   }
