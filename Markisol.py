@@ -29,8 +29,9 @@ REPEAT_COMMAND = 8
 
 
 # Microseconds (us) converted to seconds for time.sleep() function:
-MARKISOL_AGC1_PULSE = 0.00241
-MARKISOL_AGC2_PULSE = 0.00132
+MARKISOL_AGC1_PULSE = 0.004885
+MARKISOL_AGC2_PULSE = 0.00241
+MARKISOL_AGC3_PULSE = 0.00132
 MARKISOL_RADIO_SILENCE = 0.005045
 
 MARKISOL_PULSE_SHORT = 0.0003
@@ -55,6 +56,9 @@ def sendMarkisolCommand(command):
     for t in range(REPEAT_COMMAND):
         doMarkisolTribitSend(command)
 
+    # Radio silence at the end of last command:
+    transmitWaveformLow(MARKISOL_RADIO_SILENCE)
+
     # Disable output to transmitter and clean up:
     exitProgram()
 # ------------------------------------------------------------------
@@ -66,37 +70,35 @@ def doMarkisolTribitSend(command):
     # AGC bits:
     transmitWaveformHigh(MARKISOL_AGC1_PULSE)  # AGC 1
     transmitWaveformLow(MARKISOL_AGC2_PULSE)  # AGC 2
+    transmitWaveformHigh(MARKISOL_AGC3_PULSE)  # AGC 3
 
     for i in command:
 
         if i == '0':  # LOW-HIGH-LOW
-            transmitWaveformLow(MARKISOL_PULSE_SHORT)
-            transmitWaveformHigh(MARKISOL_PULSE_SHORT)
-            transmitWaveformLow(MARKISOL_PULSE_SHORT)
+            transmitLow(MARKISOL_PULSE_SHORT)
+            transmitHigh(MARKISOL_PULSE_SHORT)
+            transmitLow(MARKISOL_PULSE_SHORT)
 
-        elif i == '1':  # HIGH-HIGH-LOW
-            transmitWaveformHigh(MARKISOL_PULSE_LONG)
-            transmitWaveformLow(MARKISOL_PULSE_SHORT)
+        elif i == '1':  # LOW-HIGH-HIGH
+            transmitLow(MARKISOL_PULSE_SHORT)
+            transmitHigh(MARKISOL_PULSE_HIGH)
 
         else:
             print "Invalid character", i, "in command! Exiting..."
             exitProgram()
-
-    # Radio silence:
-    transmitWaveformLow(MARKISOL_RADIO_SILENCE)
 # ------------------------------------------------------------------
 
 
 # ------------------------------------------------------------------
-def transmitWaveformHigh(delay):
-    GPIO.output(TRANSMIT_PIN, GPIO.LOW)  # GPIO pin LOW transmits a HIGH waveform
+def transmitHigh(delay):
+    GPIO.output(TRANSMIT_PIN, GPIO.HIGH)
     time.sleep(delay)
 # ------------------------------------------------------------------
 
 
 # ------------------------------------------------------------------
-def transmitWaveformLow(delay):
-    GPIO.output(TRANSMIT_PIN, GPIO.HIGH)  # GPIO pin HIGH transmits a LOW waveform
+def transmitLow(delay):
+    GPIO.output(TRANSMIT_PIN, GPIO.LOW)
     time.sleep(delay)
 # ------------------------------------------------------------------
 
