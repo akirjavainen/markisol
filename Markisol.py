@@ -81,7 +81,7 @@ def doMarkisolTribitSend(command):
 
         elif i == '1':  # LOW-HIGH-HIGH
             transmitLow(MARKISOL_PULSE_SHORT)
-            transmitHigh(MARKISOL_PULSE_HIGH)
+            transmitHigh(MARKISOL_PULSE_LONG)
 
         else:
             print "Invalid character", i, "in command! Exiting..."
