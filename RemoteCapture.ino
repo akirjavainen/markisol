@@ -51,26 +51,20 @@ void loop()
 {
   int i = 0;
   unsigned long t = 0;
-
-
-  // As a quick hack, we add the leading 0 here.
-  // The way I wrote the code misses the first data bit.
-  // However, every Markisol protocol command starts with
-  // it, so function-wise it's not a big deal:
-  String command = "0";
+  String command = "";
 
 
   // *********************************************************************
-  // Wait for the first AGC bit:
+  // Wait for the first AGC:
   // *********************************************************************
-  // HIGH between 2430-2495 us
+  // HIGH between 4500-6000 us
   // *********************************************************************
   
-  while (t < 2430 || t > 2495) {
-    t = pulseIn(RECEIVE_PIN, LOW, 1000000); // Waits for a HIGH waveform spike (low-HIGH-low)
-
+  while (t < 4500 || t > 6000) {
+    t = pulseIn(RECEIVE_PIN, HIGH, 1000000); // / Waits for HIGH and times it
+    
     if (DEBUG) { // For finding AGC timings
-      if (t > 2000 && t < 3000) Serial.println(t);
+      if (t > 3000 && t < 7000) Serial.println(t);
     }
   }
 
@@ -82,16 +76,16 @@ void loop()
 
 
   // *********************************************************************
-  // Wait for second AGC bit:
+  // Wait for the second AGC:
   // *********************************************************************
-  // LOW between 1290-1640 us
+  // LOW between 2300-2600 us
   // *********************************************************************
   
-  while (t < 1290 || t > 1640) {
-    t = pulseIn(RECEIVE_PIN, HIGH, 1000000); // Waits for a LOW waveform spike (high-LOW-high)
-
+  while (t < 2300 || t > 2600) {
+    t = pulseIn(RECEIVE_PIN, LOW, 1000000); // / Waits for LOW and times it
+    
     if (DEBUG) { // For finding AGC timings
-      if (t > 1000 && t < 2000) Serial.println(t);
+      if (t > 2300 && t < 2600) Serial.println(t);
     }
   }
 
@@ -103,35 +97,54 @@ void loop()
 
 
   // *********************************************************************
+  // Wait for the third AGC:
+  // *********************************************************************
+  // HIGH between 1100-1800 us
+  // *********************************************************************
+  
+  while (t < 1100 || t > 1800) {
+    t = pulseIn(RECEIVE_PIN, HIGH, 1000000); // Waits for HIGH and times it
+
+    if (DEBUG) { // For finding AGC timings
+      if (t > 500 && t < 3000) Serial.println(t);
+    }
+  }
+
+  if (DEBUG) {
+    Serial.print("AGC 3: ");
+    Serial.println(t);
+    //return; // If modifying this code for another protocol, stop here
+  }
+
+
+  // *********************************************************************
   // Command bits, locate them simply by HIGH waveform spikes:
   // *********************************************************************  
-  // 0 = 290-390 us
-  // 1 = 560-760 us
+  // 0 = 200-400 us
+  // 1 = 500-800 us
   // *********************************************************************
 
   while (i < 41) {
-    t = pulseIn(RECEIVE_PIN, LOW, 1000000); // Waits for a HIGH waveform spike (low-HIGH-low)
+    t = pulseIn(RECEIVE_PIN, HIGH, 1000000); // Waits for HIGH and times it
     
     if (DEBUG) {
       Serial.print(t);
       Serial.print(": ");
     }
 
-    if (t > 560 && t < 760) { // Found 1
+    if (t > 500 && t < 800) { // Found 1
       command += "1";
       if (DEBUG) Serial.println("1");
       
-    } else if (t > 290 && t < 390) { // Found 0
+    } else if (t > 200 && t < 400) { // Found 0
       command += "0";
       if (DEBUG) Serial.println("0");
       
-    } else if (t > 70 && t < 85) { // End spike, finish
-      if (DEBUG) Serial.println("END FOUND");
-      i = 0;
-      break;
-      
     } else { // Unrecognized bit, finish
-      if (DEBUG) Serial.println("INVALID BIT");
+      if (ADDITIONAL) {
+        Serial.print("INVALID TIMING: ");
+        Serial.println(t);
+      }
       i = 0;
       break;
     }
@@ -145,23 +158,25 @@ void loop()
 
   // Correct data bits length is 41 bits, dismiss bad captures:
   if (command.length() != 41) {
-    Serial.print("Bad capture, invalid command length ");
-    Serial.println(command.length());
-    if (ADDITIONAL) Serial.println("Invalid command: " + command);
-    Serial.println();
+    
+    if (ADDITIONAL) {
+      Serial.print("Bad capture, invalid command length ");
+      Serial.println(command.length());
+      Serial.println();
+    }
     
   } else {
     Serial.println("Successful capture, full command is: " + command);
-    Serial.println("Remote control (unique) ID: " + command.substring(0, 17));
-    Serial.println("Channel: " + printChannel(command.substring(17, 21)));
-    Serial.println("Command: " + printCommand(command.substring(21, 25)));
-    Serial.println("Remote control model: " + printRemoteModel(command.substring(25, 33)));
+    Serial.println("Remote control (unique) ID: " + command.substring(0, 16));
+    Serial.println("Channel: " + printChannel(command.substring(16, 20)));
+    Serial.println("Command: " + printCommand(command.substring(20, 24)));
+    Serial.println("Remote control model: " + printRemoteModel(command.substring(24, 32)));
     
     if (ADDITIONAL) {
       Serial.print("Remote control ID (DEC): ");
-      Serial.println(convertBinaryStringToInt(command.substring(0, 17)), DEC);
+      Serial.println(convertBinaryStringToInt(command.substring(0, 16)), DEC);
       Serial.print("Trailing bits: ");
-      Serial.println(convertBinaryStringToInt(command.substring(33, 41)), DEC);
+      Serial.println(convertBinaryStringToInt(command.substring(32, 41)), DEC);
     }
     Serial.println();
   }
@@ -175,22 +190,22 @@ String printChannel(String channel) {
 
   switch (c) {
 
-    case 0x7: // 0111
+    case 0x8: // 1000
       return "1"; // ...or remote model BF-301
 
-    case 0xB: // 1011
+    case 0x4: // 0100
       return "2"; // ...or remote model BF-101
 
-    case 0x3: // 0011
+    case 0xC: // 1100
       return "3";
 
-    case 0xD: // 1101
+    case 0x2: // 0010
       return "4";
 
-    case 0x5: // 0101
+    case 0xA: // 1010
       return "5";
 
-    case 0x0: // 0000
+    case 0xF: // 1111
       return "ALL";
 
   }
@@ -205,22 +220,22 @@ String printCommand(String command) {
 
   switch (c) {
     
-    case 0x7: // 0111
+    case 0x8: // 1000
       return "DOWN";
 
-    case 0xC: // 1100
+    case 0x3: // 0011
       return "UP";
 
-    case 0x5: // 0101
+    case 0xA: // 1010
       return "STOP";
 
-    case 0xD: // 1101
+    case 0x2: // 0010
       return "PAIR/CONFIRM (C)";
 
-    case 0xB: // 1011
+    case 0x4: // 0100
       return "PROGRAM LIMITS (L)";
 
-    case 0xE: // 1110
+    case 0x1: // 0001
       return "CHANGE DIRECTION OF ROTATION (STOP + L)";
 
   }
@@ -235,13 +250,13 @@ String printRemoteModel(String model) {
 
   switch (c) {
 
-    case 0x79: // 01111001
+    case 0x86: // 10000110
       return "BF-305 (5 channels)";
 
-    case 0xFC: // 11111100
+    case 0x3: // 00000011
       return "BF-101 (single channel)";
 
-    case 0x7C: // 01111100
+    case 0x83: // 10000011
       return "BF-301 (single channel)";
       
   }
