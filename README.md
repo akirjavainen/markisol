@@ -13,7 +13,7 @@ Markisol products have been sold by The Home Depot, IKEA and also under the name
 # How to use
 1. Load up RemoteCapture.ino and plug a 433.92MHz receiver to digital pin 2.
 2. Open up Tools -> Serial Monitor in Arduino IDE and start pressing buttons from your original remotes.
-3. Copy paste the 41 bit commands to Markisol.ino for sendMarkisolCommand(). I recommend using #define preprocessor directives to conserve memory. In case of single channel remotes like the BF-301, you could simply call the sendShortMarkisolCommand() function with the 17 bit remote ID and COMMAND_DOWN (for example).
+3. Copy paste the 41 bit commands to Markisol.ino for sendMarkisolCommand(). I recommend using #define preprocessor directives to conserve memory. In case of single channel remotes like the BF-301, you could simply call the sendShortMarkisolCommand() function with the 16 bit remote ID and COMMAND_DOWN (for example).
 
 
 # How to use with example commands
