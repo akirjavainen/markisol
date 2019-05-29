@@ -11,11 +11,9 @@
 * 
 * Unless I'm completely mistaken, each remote has its unique, hard coded ID. I've included all commands from one as an
 * example, but you can use RemoteCapture.ino to capture your own remotes. The purpose of this project was to get my own
-* window shades automated, so there's a bit more work to be done, to reverse engineer the final 8 bits of the commands.
-* I don't know how they're formed, but the motors just seem to ignore them anyway. You could zero them out (as well as
-* the previous 8 bits for the remote model) and command the shades with 25 bit commands. If you only have single channel
-* remotes (BF-301 for example), you can zero out the 4 bits for channel as well. In fact, only the 17 bit remote ID and
-* the 4 bit command are actually required in most cases.
+* window shades automated, so there's a bit more work to be done, to reverse engineer the final 9 trailing bits of the
+* commands. I don't know how they're formed, but motors just seem to ignore them anyway. You could zero them out and
+* commands will still work.
 * 
 * 
 * HOW TO USE
@@ -24,7 +22,7 @@
 * More info about this provided in RemoteCapture.ino.
 * 
 * If you have no multichannel remotes like the BF-305, you can also call the sendShortMarkisolCommand() function with
-* your 17 bit remote ID and a command (see setup() below for more info).
+* your 16 bit remote ID and a command (see setup() below for more info).
 * 
 * 
 * HOW TO USE WITH EXAMPLE COMMANDS
@@ -41,14 +39,14 @@
 * PROTOCOL DESCRIPTION
 * 
 * Tri-state bits are used.
-* A single command is: 2 AGC bits + 41 command tribits + radio silence
-* Swapping HIGH and LOW does not work with these shades.
+* A single command is: 3 AGC bits + 41 command tribits + radio silence
 *
 * All sample counts below listed with a sample rate of 44100 Hz (sample count / 44100 = microseconds).
 *
 * Starting (AGC) bits:
-* HIGH of approx. 107 samples = 2426 us
-* LOW of approx. 59 samples = 1338 us
+* HIGH of approx. 216 samples = 4900 us
+* LOW of approx. 107 samples = 2426 us
+* HIGH of approx. 59 samples = 1338 us
 * 
 * Pulse length:
 * SHORT: approx. 14 samples = 317 us
@@ -56,17 +54,18 @@
 * 
 * Data bits:
 * Data 0 = short LOW, short HIGH, short LOW (wire 010)
-* Data 1 = long HIGH, short LOW (wire 110)
+* Data 1 = short LOW, long HIGH (wire 011)
 * 
 * Command is as follows:
-* 17 bits for (unique) remote control ID, hard coded in remotes
-* 4 bits for channel ID: 1 = 0111 (also used by BF-301), 2 = 1011 (also used by BF-101), 3 = 0011, 4 = 1101, 5 = 0101, ALL = 0000
-* 4 bits for command: DOWN = 0111, UP = 1100, STOP = 0101, CONFIRM/PAIR = 1101, LIMITS = 1011, ROTATION DIRECTION = 1110
-* 8 bits for remote control model: BF-305 multi = 01111001, BF-101 single = 11111100, BF-301 single = 01111100
-* 8 bits for something? I have yet to figure out how this is formed, but no motor seems to care if I simply zero them out
+* 16 bits for (unique) remote control ID, hard coded in remotes
+* 4 bits for channel ID: 1 = 1000 (also used by BF-301), 2 = 0100 (also used by BF-101), 3 = 1100, 4 = 0010, 5 = 1010, ALL = 1111
+* 4 bits for command: DOWN = 1000, UP = 0011, STOP = 1010, CONFIRM/PAIR = 0010, LIMITS = 0100, ROTATION DIRECTION = 0001
+* 8 bits for remote control model: BF-305 multi = 10000110, BF-101 single = 00000011, BF-301 single = 10000011
+* 9 bits for something? I have yet to figure out how this is formed, but no motor seems to care if I simply zero them out
+* 
 * = 41 bits in total
 *
-* There is a short HIGH spike of 80 us at the end, but it is not necessary to replicate.
+* There is a short LOW drop of 80 us at the end of each command, before the next AGC (or radio silence at the end of last command).
 * End with LOW radio silence of (minimum) 223 samples = 5057 us
 * 
 * 
@@ -78,8 +77,8 @@
 * To view the waveform Arduino is transmitting (and debugging timings etc.), I found it easiest to directly connect the digital pin (13)
 * from Arduino -> 10K Ohm resistor -> USB sound card line-in. This way the waveform was very clear.
 * 
-* Note that the waveform captured by Audacity is basically "upside down". This code was written without using Audacity's Effects -> Invert
-* (LOW/HIGH are inverted in the functions below).
+* Note that PC sound cards may capture the waveform "upside down" (phase inverted). You may need to apply Audacity's Effects -> Invert
+* to get the HIGHs and LOWs correctly.
 * 
 ******************************************************************************************************************************************************************
 */
@@ -87,38 +86,39 @@
 
 
 // Example commands to try (or just capture your own remotes with RemoteCapture.ino):
-#define SHADE_PAIR_EXAMPLE                 "01010001110101100011111010111110000100000" // C button
-#define SHADE_DOWN_EXAMPLE                 "01010001110101100011101110111110000101011" // DOWN button
-#define SHADE_STOP_EXAMPLE                 "01010001110101100011101010111110000101000" // STOP button
-#define SHADE_UP_EXAMPLE                   "01010001110101100011111000111110000100001" // UP button
-#define SHADE_LIMIT_EXAMPLE                "01010001110101100011110110111110000100111" // L button
-#define SHADE_CHANGE_DIRECTION_EXAMPLE     "01010001110101100011111100111110000100010" // STOP + L buttons
+#define SHADE_PAIR_EXAMPLE                 "10111011111011111000001010000011110101001" // C button
+#define SHADE_DOWN_EXAMPLE                 "10111011111011111000100010000011110110101" // DOWN button
+#define SHADE_STOP_EXAMPLE                 "10111011111011111000101010000011110110001" // STOP button
+#define SHADE_UP_EXAMPLE                   "10111011111011111000001110000011110101011" // UP button
+#define SHADE_LIMIT_EXAMPLE                "10111011111011111000010010000011110100101" // L button
+#define SHADE_CHANGE_DIRECTION_EXAMPLE     "10111011111011111000000110000011110101111" // STOP + L buttons
 
 #define TRANSMIT_PIN                       13   // We'll use digital 13 for transmitting
 #define REPEAT_COMMAND                      8   // How many times to repeat the same command: original remotes repeat 8 (multi) or 10 (single) times by default
-#define DEBUG                           false   // Do note that if you add serial output during transmit, it will cause delay and commands may fail
+#define DEBUG                           false   // Do note that if you print serial output during transmit, it will cause delay and commands may fail
 
 // If you wish to use PORTB commands instead of digitalWrite, these are for Arduino Uno digital 13:
 #define D13high | 0x20; 
 #define D13low  & 0xDF; 
 
 // For sendShortMarkisolCommand():
-//#define MY_REMOTE_ID_1                    "00000000000000000"   // Enter your 17 bit remote ID here or make up a binary number and confirm/pair it with the motor
-#define DEFAULT_CHANNEL                     "0000"                // Channel information is only required for multichannel remotes like the BF-305
-#define DEFAULT_REMOTE_MODEL                "01111100"            // We default to BF-301, but this is actually ignored by motors and could be plain zeroes
-#define DEFAULT_TRAILING_BITS               "00000000"            // Last 8 bits of the command. What do they mean? No idea. Again, ignored by motors.
-#define COMMAND_DOWN                        "0111"                // Remote button DOWN
-#define COMMAND_UP                          "1100"                // Remote button UP
-#define COMMAND_STOP                        "0101"                // Remote button STOP
-#define COMMAND_PAIR                        "1101"                // Remote button C
-#define COMMAND_PROGRAM_LIMITS              "1011"                // Remote button L
-#define COMMAND_CHANGE_ROTATION_DIRECTION   "1110"                // Remote buttons STOP + L
+//#define MY_REMOTE_ID_1                    "0000000000000000"    // Enter your 16 bit remote ID here or make up a binary number and confirm/pair it with the motor
+#define DEFAULT_CHANNEL                     "1000"                // Channel information is only required for multichannel remotes like the BF-305
+#define DEFAULT_REMOTE_MODEL                "10000011"            // We default to BF-301, but this is actually ignored by motors and could be plain zeroes
+#define DEFAULT_TRAILING_BITS               "000000000"           // Last 9 bits of the command. What do they mean? No idea. Again, ignored by motors.
+#define COMMAND_DOWN                        "1000"                // Remote button DOWN
+#define COMMAND_UP                          "0011"                // Remote button UP
+#define COMMAND_STOP                        "1010"                // Remote button STOP
+#define COMMAND_PAIR                        "0010"                // Remote button C
+#define COMMAND_PROGRAM_LIMITS              "0100"                // Remote button L
+#define COMMAND_CHANGE_ROTATION_DIRECTION   "0001"                // Remote buttons STOP + L
 
 // Timings in microseconds (us). Get sample count by zooming all the way in to the waveform with Audacity.
 // Calculate microseconds with: (samples / sample rate, usually 44100 or 48000) - ~15-20 to compensate for delayMicroseconds overhead.
 // Sample counts listed below with a sample rate of 44100 Hz:
-#define MARKISOL_AGC1_PULSE                   2410  // 107 samples
-#define MARKISOL_AGC2_PULSE                   1320  // 59 samples
+#define MARKISOL_AGC1_PULSE                   4885  // 216 samples
+#define MARKISOL_AGC2_PULSE                   2410  // 107 samples
+#define MARKISOL_AGC3_PULSE                   1320  // 59 samples
 #define MARKISOL_RADIO_SILENCE                5045  // 223 samples
 
 #define MARKISOL_PULSE_SHORT                  300   // 13-16 samples
@@ -132,7 +132,7 @@
 void setup() {
 
   Serial.begin(9600); // Used for error messages even with DEBUG set to false
-      
+  
   if (DEBUG) Serial.println("Starting up...");
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -173,31 +173,34 @@ void loop() {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void sendMarkisolCommand(String command) {
-  
+void sendMarkisolCommand(char* command) {
+
+  if (command == NULL) {
+    errorLog("sendMarkisolCommand(): Command array pointer was NULL, cannot continue.");
+    return;
+  }
+
   // Prepare for transmitting and check for validity
   pinMode(TRANSMIT_PIN, OUTPUT); // Prepare the digital pin for output
   
-  if (command.length() < MARKISOL_COMMAND_BIT_ARRAY_SIZE) {
+  if (strlen(command) < MARKISOL_COMMAND_BIT_ARRAY_SIZE) {
     errorLog("sendMarkisolCommand(): Invalid command (too short), cannot continue.");
     return;
   }
-  if (command.length() > MARKISOL_COMMAND_BIT_ARRAY_SIZE) {
+  if (strlen(command) > MARKISOL_COMMAND_BIT_ARRAY_SIZE) {
     errorLog("sendMarkisolCommand(): Invalid command (too long), cannot continue.");
     return;
   }
-
-  // Declare the array (int) of command bits
-  int command_array[MARKISOL_COMMAND_BIT_ARRAY_SIZE];
-
-  // Processing a string during transmit is just too slow,
-  // let's convert it to an array of int first:
-  convertStringToArrayOfInt(command, command_array, MARKISOL_COMMAND_BIT_ARRAY_SIZE);
   
   // Repeat the command:
   for (int i = 0; i < REPEAT_COMMAND; i++) {
-    doMarkisolTribitSend(command_array);
+    doMarkisolTribitSend(command);
   }
+
+  // Radio silence at the end of last command.
+  // It's better to go a bit over than under minimum required length:
+  transmitLow(MARKISOL_RADIO_SILENCE);
+
 
   // Disable output to transmitter to prevent interference with
   // other devices. Otherwise the transmitter will keep on transmitting,
@@ -207,55 +210,56 @@ void sendMarkisolCommand(String command) {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void sendShortMarkisolCommand(String remote_id, String command) {
-  
-  if (remote_id.length() != 17) {
-    errorLog("sendShortMarkisolCommand(): Correct remote ID length is 17 bits. Cannot continue.");
+void sendShortMarkisolCommand(char* remote_id, char* command) {
+
+  if (strlen(remote_id) != 16) {
+    errorLog("sendShortMarkisolCommand(): Correct remote ID length is 16 bits. Cannot continue.");
     return;
   }
-  if (command.length() != 4) {
+  if (strlen(command) != 4) {
     errorLog("sendShortMarkisolCommand(): Correct command length is 4 bits. Cannot continue.");
     return;
   }
 
   // Let's form and transmit the full command:
-  sendMarkisolCommand(remote_id + DEFAULT_CHANNEL + command + DEFAULT_REMOTE_MODEL + DEFAULT_TRAILING_BITS);
+  char* full_command = new char[MARKISOL_COMMAND_BIT_ARRAY_SIZE];
+
+  full_command[0] = '\0';
+  strcat(full_command, remote_id);
+  strcat(full_command, DEFAULT_CHANNEL);
+  strcat(full_command, command);
+  strcat(full_command, DEFAULT_REMOTE_MODEL);
+  strcat(full_command, DEFAULT_TRAILING_BITS);
+
+  sendMarkisolCommand(full_command);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void doMarkisolTribitSend(int *command_array) {
-
-  if (command_array == NULL) {
-    errorLog("doMarkisolTribitSend(): Array pointer was NULL, cannot continue.");
-    return;
-  }
+void doMarkisolTribitSend(char* command) {
 
   // Starting (AGC) bits:
-  transmitWaveformHigh(MARKISOL_AGC1_PULSE);
-  transmitWaveformLow(MARKISOL_AGC2_PULSE);
+  transmitHigh(MARKISOL_AGC1_PULSE);
+  transmitLow(MARKISOL_AGC2_PULSE);
+  transmitHigh(MARKISOL_AGC3_PULSE);
 
   // Transmit command:
   for (int i = 0; i < MARKISOL_COMMAND_BIT_ARRAY_SIZE; i++) {
 
-      // If current bit is 0, transmit LOW-HIGH-LOW:
-      if (command_array[i] == 0) {
-        transmitWaveformLow(MARKISOL_PULSE_SHORT);
-        transmitWaveformHigh(MARKISOL_PULSE_SHORT);
-        transmitWaveformLow(MARKISOL_PULSE_SHORT);
+      // If current bit is 0, transmit LOW-HIGH-LOW (010):
+      if (command[i] == '0') {
+        transmitLow(MARKISOL_PULSE_SHORT);
+        transmitHigh(MARKISOL_PULSE_SHORT);
+        transmitLow(MARKISOL_PULSE_SHORT);
       }
 
-      // If current bit is 1, transmit HIGH-HIGH-LOW:
-      if (command_array[i] == 1) {
-        transmitWaveformHigh(MARKISOL_PULSE_LONG);
-        transmitWaveformLow(MARKISOL_PULSE_SHORT);
+      // If current bit is 1, transmit LOW-HIGH-HIGH (011):
+      if (command[i] == '1') {
+        transmitLow(MARKISOL_PULSE_SHORT);
+        transmitHigh(MARKISOL_PULSE_LONG);
       }   
    }
 
-  // Radio silence at the end.
-  // It's better to go a bit over than under minimum required length:
-  transmitWaveformLow(MARKISOL_RADIO_SILENCE);
-  
   if (DEBUG) {
     Serial.println();
     Serial.print("Transmitted ");
@@ -267,52 +271,18 @@ void doMarkisolTribitSend(int *command_array) {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void transmitWaveformHigh(int delay_microseconds) {
-  digitalWrite(TRANSMIT_PIN, LOW); // Digital pin low transmits a high waveform
-  //PORTB = PORTB D13low; // If you wish to use faster PORTB commands instead
+void transmitHigh(int delay_microseconds) {
+  digitalWrite(TRANSMIT_PIN, HIGH);
+  //PORTB = PORTB D13high; // If you wish to use faster PORTB calls instead
   delayMicroseconds(delay_microseconds);
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void transmitWaveformLow(int delay_microseconds) {
-  digitalWrite(TRANSMIT_PIN, HIGH); // Digital pin high transmits a low waveform
-  //PORTB = PORTB D13high; // If you wish to use faster PORTB commands instead
+void transmitLow(int delay_microseconds) {
+  digitalWrite(TRANSMIT_PIN, LOW);
+  //PORTB = PORTB D13low; // If you wish to use faster PORTB calls instead
   delayMicroseconds(delay_microseconds);
-}
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-int convertStringToInt(String s) {
-  char carray[2];
-  int i = 0;
-  
-  s.toCharArray(carray, sizeof(carray));
-  i = atoi(carray);
-
-  return i;
-}
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void convertStringToArrayOfInt(String command, int *int_array, int command_array_size) {
-  String c = "";
-
-  if (int_array == NULL) {
-    errorLog("convertStringToArrayOfInt(): Array pointer was NULL, cannot continue.");
-    return;
-  }
- 
-  for (int i = 0; i < command_array_size; i++) {
-      c = command.substring(i, i + 1);
-
-      if (c == "0" || c == "1") {
-        int_array[i] = convertStringToInt(c);
-      } else {
-        errorLog("convertStringToArrayOfInt(): Invalid character " + c + " in command.");
-        return;
-      }
-  }
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
