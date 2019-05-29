@@ -57,7 +57,7 @@ def sendMarkisolCommand(command):
         doMarkisolTribitSend(command)
 
     # Radio silence at the end of last command:
-    transmitWaveformLow(MARKISOL_RADIO_SILENCE)
+    transmitLow(MARKISOL_RADIO_SILENCE)
 
     # Disable output to transmitter and clean up:
     exitProgram()
@@ -68,9 +68,9 @@ def sendMarkisolCommand(command):
 def doMarkisolTribitSend(command):
 
     # AGC bits:
-    transmitWaveformHigh(MARKISOL_AGC1_PULSE)  # AGC 1
-    transmitWaveformLow(MARKISOL_AGC2_PULSE)  # AGC 2
-    transmitWaveformHigh(MARKISOL_AGC3_PULSE)  # AGC 3
+    transmitHigh(MARKISOL_AGC1_PULSE)  # AGC 1
+    transmitLow(MARKISOL_AGC2_PULSE)  # AGC 2
+    transmitHigh(MARKISOL_AGC3_PULSE)  # AGC 3
 
     for i in command:
 
