@@ -7,7 +7,7 @@ I've automated a lot in my house, but there was that one thing that kept botheri
 
 There are many reasons to control window shades from a program. For starters, automating them from Arduino/Raspberry Pi (scheduling, based on outside temperature and/or sunlight, based on home alarm Home/Away mode etc.) and voice commands from Alexa via TRIGGERcmd. I also control them remotely via SSH & HTTPS and wrote a PHP script for Raspberry Pi, enabling control from browsers and mobile phones.
 
-Markisol products have been sold by The Home Depot, IKEA and also under the name Feelstyle, so this protocol works with quite many products, identifiable by the remote control models. For example, I have motors from a Chinese brand Bofu, who utilize the same remotes. Unless I'm completely mistaken, each remote has its unique (or nearly unique), hard coded ID. Commands can be captured by RemoteCapture.ino and I've also included example commands (including PAIR/CONFIRM) from one remote.
+Markisol products have been sold by The Home Depot, IKEA, Rollerhouse and also under the name Feelstyle, so this protocol works with quite many products, identifiable by the remote control models. I have motors from a Chinese brand Bofu that utilize the same remotes. Unless I'm completely mistaken, each remote has its unique (or nearly unique), hard coded ID. Commands can be captured by RemoteCapture.ino and I've also included example commands (including PAIR/CONFIRM) from one remote.
 
 
 # How to use
