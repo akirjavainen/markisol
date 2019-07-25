@@ -99,10 +99,10 @@ void loop()
   // *********************************************************************
   // Wait for the third AGC:
   // *********************************************************************
-  // HIGH between 1100-1800 us
+  // HIGH between 1100-1900 us
   // *********************************************************************
   
-  while (t < 1100 || t > 1800) {
+  while (t < 1100 || t > 1900) {
     t = pulseIn(RECEIVE_PIN, HIGH, 1000000); // Waits for HIGH and times it
 
     if (DEBUG) { // For finding AGC timings
