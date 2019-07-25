@@ -12,8 +12,11 @@
 * Unless I'm completely mistaken, each remote has its unique, hard coded ID. I've included all commands from one as an
 * example, but you can use RemoteCapture.ino to capture your own remotes. The purpose of this project was to get my own
 * window shades automated, so there's a bit more work to be done, to reverse engineer the final 9 trailing bits of the
-* commands. I don't know how they're formed, but motors just seem to ignore them anyway. You could zero them out and
-* commands will still work.
+* commands. I don't (yet) know how they're formed, but most motors simply seem to ignore them. However, some require
+* them to be correct and sendShortMarkisolCommand() will not work with such motors (use the full 41 bit command with
+* sendMarkisolCommand() in that case).
+* 
+* Special thanks to Chris Teel for testing timings with some Rollerhouse products to achieve better compatibility.
 * 
 * 
 * HOW TO USE
@@ -21,8 +24,9 @@
 * Capture your remote controls with RemoteCapture.ino and copy paste the 41 bit commands to Markisol.ino for sendMarkisolCommand().
 * More info about this provided in RemoteCapture.ino.
 * 
-* If you have no multichannel remotes like the BF-305, you can also call the sendShortMarkisolCommand() function with
-* your 16 bit remote ID and a command (see setup() below for more info).
+* If you have no multichannel remotes like the BF-305, you can also try the sendShortMarkisolCommand() function with
+* your 16 bit remote ID and a command (see setup() below for more info). This function will not work with every motor,
+* so first try the full 41 bit commands.
 * 
 * 
 * HOW TO USE WITH EXAMPLE COMMANDS
@@ -44,12 +48,12 @@
 * All sample counts below listed with a sample rate of 44100 Hz (sample count / 44100 = microseconds).
 *
 * Starting (AGC) bits:
-* HIGH of approx. 216 samples = 4900 us
-* LOW of approx. 107 samples = 2426 us
-* HIGH of approx. 59 samples = 1338 us
+* HIGH of approx. 216 samples = 4885 us
+* LOW of approx. 108 samples = 2450 us
+* HIGH of approx. 75 samples = 1700 us
 * 
 * Pulse length:
-* SHORT: approx. 14 samples = 317 us
+* SHORT: approx. 15 samples = 340 us
 * LONG: approx. 30 samples = 680 us
 * 
 * Data bits:
@@ -61,12 +65,12 @@
 * 4 bits for channel ID: 1 = 1000 (also used by BF-301), 2 = 0100 (also used by BF-101), 3 = 1100, 4 = 0010, 5 = 1010, ALL = 1111
 * 4 bits for command: DOWN = 1000, UP = 0011, STOP = 1010, CONFIRM/PAIR = 0010, LIMITS = 0100, ROTATION DIRECTION = 0001
 * 8 bits for remote control model: BF-305 multi = 10000110, BF-101 single = 00000011, BF-301 single = 10000011
-* 9 bits for something? I have yet to figure out how this is formed, but no motor seems to care if I simply zero them out
+* 9 bits for something? I have yet to figure out how this is formed, but most motors simply do not seem to care (others do)
 * 
 * = 41 bits in total
 *
 * There is a short LOW drop of 80 us at the end of each command, before the next AGC (or radio silence at the end of last command).
-* End with LOW radio silence of (minimum) 223 samples = 5057 us
+* End the last command in sequence with LOW radio silence of 223 samples = 5057 us
 * 
 * 
 * HOW THIS WAS STARTED
@@ -77,7 +81,7 @@
 * To view the waveform Arduino is transmitting (and debugging timings etc.), I found it easiest to directly connect the digital pin (13)
 * from Arduino -> 10K Ohm resistor -> USB sound card line-in. This way the waveform was very clear.
 * 
-* Note that PC sound cards may capture the waveform "upside down" (phase inverted). You may need to apply Audacity's Effects -> Invert
+* Note that a PC sound cards may capture the waveform "upside down" (phase inverted). You may need to apply Audacity's Effects -> Invert
 * to get the HIGHs and LOWs correctly.
 * 
 ******************************************************************************************************************************************************************
@@ -117,14 +121,20 @@
 // Calculate microseconds with: (samples / sample rate, usually 44100 or 48000) - ~15-20 to compensate for delayMicroseconds overhead.
 // Sample counts listed below with a sample rate of 44100 Hz:
 #define MARKISOL_AGC1_PULSE                   4885  // 216 samples
-#define MARKISOL_AGC2_PULSE                   2410  // 107 samples
-#define MARKISOL_AGC3_PULSE                   1320  // 59 samples
-#define MARKISOL_RADIO_SILENCE                5045  // 223 samples
+#define MARKISOL_AGC2_PULSE                   2450  // 108 samples
+#define MARKISOL_AGC3_PULSE                   1700  // 75 samples
+#define MARKISOL_RADIO_SILENCE                5057  // 223 samples
 
-#define MARKISOL_PULSE_SHORT                  300   // 13-16 samples
-#define MARKISOL_PULSE_LONG                   680   // 26-32 samples
+#define MARKISOL_PULSE_SHORT                  340   // 15 samples
+#define MARKISOL_PULSE_LONG                   680   // 30 samples
 
 #define MARKISOL_COMMAND_BIT_ARRAY_SIZE       41    // Command bit count
+
+
+// NOTE: If you're having issues getting the motors to respond, try these previous defaults:
+//#define MARKISOL_AGC2_PULSE                   2410  // 107 samples
+//#define MARKISOL_AGC3_PULSE                   1320  // 59 samples
+//#define MARKISOL_PULSE_SHORT                  300   // 13 samples
 
 
 
@@ -132,7 +142,6 @@
 void setup() {
 
   Serial.begin(9600); // Used for error messages even with DEBUG set to false
-  
   if (DEBUG) Serial.println("Starting up...");
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -161,7 +170,10 @@ void loop() {
   // --- Short commands ---
   // If your remote is single channel (like the BF-301), you only need the remote ID.
   // You can make up your own "virtual" ID, too. In that case, just set the motor to
-  // pairing mode and transmit COMMAND_PAIR first:
+  // pairing mode and transmit COMMAND_PAIR first.
+
+  // Do note that short commands may not work with every motor. The full 41 bit
+  // binary command has bits and pieces that some models require, others don't.
 
   //sendShortMarkisolCommand(MY_REMOTE_ID_1, COMMAND_PAIR);
   //while (true) {} // Stop after pairing
@@ -169,6 +181,7 @@ void loop() {
   
   //sendShortMarkisolCommand(MY_REMOTE_ID_1, COMMAND_DOWN);
   //delay(3000);
+
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
