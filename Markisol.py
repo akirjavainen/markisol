@@ -44,8 +44,8 @@ MARKISOL_COMMAND_BIT_ARRAY_SIZE = 41
 def sendMarkisolCommand(command):
 
     if len(str(command)) is not MARKISOL_COMMAND_BIT_ARRAY_SIZE:
-        print "Your (invalid) command was", len(str(command)), "bits long."
-        print ""
+        print("Your (invalid) command was", len(str(command)), "bits long.")
+        print
         printUsage()
 
     # Prepare:
@@ -84,7 +84,7 @@ def doMarkisolTribitSend(command):
             transmitHigh(MARKISOL_PULSE_LONG)
 
         else:
-            print "Invalid character", i, "in command! Exiting..."
+            print("Invalid character", i, "in command! Exiting...")
             exitProgram()
 # ------------------------------------------------------------------
 
@@ -105,10 +105,10 @@ def transmitLow(delay):
 
 # ------------------------------------------------------------------
 def printUsage():
-    print "Usage:"
-    print os.path.basename(sys.argv[0]), "[command_string]"
+    print("Usage:")
+    print(os.path.basename(sys.argv[0]), "[command_string]")
     print
-    print "Correct command length is", MARKISOL_COMMAND_BIT_ARRAY_SIZE, "bits."
+    print("Correct command length is", MARKISOL_COMMAND_BIT_ARRAY_SIZE, "bits.")
     print
     exit()
 # ------------------------------------------------------------------
