@@ -152,6 +152,7 @@ void loop() {
   // Pair a shade (first set the shade to pairing mode by holding
   // down its P/SETTING button until the "TA-TA" or a beep):
   //sendMarkisolCommand(SHADE_PAIR_EXAMPLE);
+ // sendMarkisolCommand("01100110111010100100001110000110100001001");
   //while (true) {} // Stop after pairing, you can use UP/STOP/DOWN commands afterwards
   // ---
 
@@ -180,7 +181,7 @@ void loop() {
   // ---
   
   //sendShortMarkisolCommand(MY_REMOTE_ID_1, COMMAND_DOWN);
-  //delay(3000);
+  delay(3000);
 
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
